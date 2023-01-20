@@ -1,0 +1,95 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model User{
+  id Int @id() @default(autoincrement())
+  email String @unique()
+  password String 
+  phone_number String?
+  name String
+  firstname String
+  url_image String?
+  admin Boolean @default(false)
+  experience String @default("BEGINNER")
+
+  walks Walk[]
+  visits Visit[]
+}
+
+model Box{
+  id Int @id() @default(autoincrement())
+  type String @default("OTHER")
+  number String
+  nbr_of_places Int @default(1)
+
+  animals Animal[]
+  visits Visit[]
+}
+
+model Animal{
+  id Int @id() @default(autoincrement())
+  species String
+  name String
+  gender String
+  size String
+  volunteer_experience String @default("BEGINNER")
+  box Box @relation(fields: [box_id], references: [id], onDelete:NoAction, onUpdate: NoAction )
+  box_id Int
+  age DateTime @db.Timestamptz() 
+  walks Walk[]
+  tags Animal_has_tag[]
+}
+
+model Walk{
+  id Int @id() @default(autoincrement())
+  date DateTime @db.Timestamptz() 
+  comment String?
+  feeling String @default("GOOD")
+
+  user User @relation(fields: [user_id], references: [id],onDelete: NoAction, onUpdate: NoAction)
+  user_id Int
+
+  animal Animal @relation(fields: [animal_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  animal_id Int
+}
+
+
+model Visit{
+  id Int @id() @default(autoincrement())
+  date DateTime @db.Timestamptz() 
+  comment String?
+
+  user User @relation(fields: [user_id], references: [id],onDelete: NoAction, onUpdate: NoAction)
+  user_id Int
+
+  box Box @relation(fields: [box_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  box_id Int 
+}
+
+model Tag{
+    id Int @id() @default(autoincrement())
+    name String
+    
+    animals Animal_has_tag[]
+}
+
+model Animal_has_tag{
+
+  // on crée un index composé, qui sera unique car les index des animaux et des tags sont eux aussi uniques
+   @@id([animal_id, tag_id])
+
+  tag Tag @relation(fields: [tag_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  tag_id Int
+  animal Animal @relation(fields: [animal_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  animal_id Int
+}
