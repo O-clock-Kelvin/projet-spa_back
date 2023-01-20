@@ -7,7 +7,8 @@
 	"author": "ToutOPoils",
 	"license": "MIT",
 	"scripts": {
-		"eslint": "eslint . --fix"
+		"eslint": "eslint . --fix",
+		"start": "node src/index.js"
 	},
 	"dependencies": {
 		"@prisma/client": "4.9.0",
