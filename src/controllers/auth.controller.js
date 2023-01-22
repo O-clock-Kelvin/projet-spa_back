@@ -19,7 +19,6 @@ const authController = {
 			});
 
 			if (user) {
-				console.log(user);
 				const passwordValidation = await authService.validatePassword(
 					password,
 					user.password
