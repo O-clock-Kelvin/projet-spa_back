@@ -40,6 +40,7 @@ model Animal{
   id Int @id() @default(autoincrement())
   species String
   name String
+  url_image String?
   gender String
   size String
   volunteer_experience String @default("BEGINNER")
