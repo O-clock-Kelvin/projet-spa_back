@@ -12,28 +12,25 @@ const userRouter = express.Router();
 /**
  * Récupère toutes les données utilisateurs
  */
-userRouter.get('/', async (req, res) => {
-	const data = await usersController.getAllUsers();
-	res.json(data);
-});
+userRouter.get('/', usersController.getAllUsers);
 
-userRouter.get('/:id', async (req, res) => {
-	const user = await usersController.getUser(req.params.id);
-	res.json(user);
-});
+userRouter.get('/:id', usersController.getUser);
 
 /**
  * Créer un nouvel utilisateur
  */
-// router.post('/users);
 
+userRouter.post('/', usersController.create);
 /**
  * Mettre à jour un utilisateur
+ * update
  */
-// router.patch('/users/:id)
+userRouter.patch('/:id', usersController.update);
 
 /**
  * Supprimer un utilisateur
- * router.delete('/users/:id')
+ * delete
  */
+userRouter.delete('/:id', usersController.delete);
+
 export default userRouter;
