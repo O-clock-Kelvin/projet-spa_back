@@ -35,18 +35,20 @@ model Box {
   visits  Visit[]
 }
 
-model Animal {
-  id                   Int              @id() @default(autoincrement())
-  species              String
-  name                 String
-  gender               String
-  size                 String
-  volunteer_experience String           @default("BEGINNER")
-  box                  Box              @relation(fields: [box_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  box_id               Int
-  age                  DateTime         @db.Timestamptz()
-  walks                Walk[]
-  tags                 Animal_has_tag[]
+
+model Animal{
+  id Int @id() @default(autoincrement())
+  species String
+  name String
+  url_image String?
+  gender String
+  size String
+  volunteer_experience String @default("BEGINNER")
+  box Box @relation(fields: [box_id], references: [id], onDelete:NoAction, onUpdate: NoAction )
+  box_id Int
+  age DateTime @db.Timestamptz() 
+  walks Walk[]
+  tags Animal_has_tag[]
 }
 
 model Walk {
