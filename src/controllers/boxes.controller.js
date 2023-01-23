@@ -5,7 +5,7 @@ import prismaClient from '../prisma.js';
 const boxesController = {
 	getAll: async (req, res) => {
 		try {
-			const boxes = await prismaClient.box.findMany({});
+			const boxes = await prismaClient.box.findMany();
 			res.json(boxes);
 		} catch (error) {
 			/**

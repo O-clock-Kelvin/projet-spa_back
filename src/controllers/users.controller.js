@@ -9,7 +9,7 @@ const usersController = {
 	 */
 	getAllUsers: async (req, res) => {
 		try {
-			const users = await prismaClient.user.findMany({});
+			const users = await prismaClient.user.findMany();
 			res.json(users);
 		} catch (error) {
 			/**
@@ -22,7 +22,7 @@ const usersController = {
 	/**
 	 * Méthode pour récupérer un utilisateur en particuliers
 	 */
-	getUser: async (req, res) => {
+	getOne: async (req, res) => {
 		try {
 			const user = await prismaClient.user.findUnique({
 				where: {

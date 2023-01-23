@@ -14,7 +14,7 @@ const userRouter = express.Router();
  */
 userRouter.get('/', usersController.getAllUsers);
 
-userRouter.get('/:id', usersController.getUser);
+userRouter.get('/:id', usersController.getOne);
 
 /**
  * Créer un nouvel utilisateur
