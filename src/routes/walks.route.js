@@ -1,7 +1,7 @@
 /** @format */
 
 import express from 'express';
-import walksController from '../controllers/walks.controller.js';
+// import walksController from '../controllers/walks.controller.js';
 
 const walkRouter = express.Router();
 
@@ -11,24 +11,27 @@ const walkRouter = express.Router();
 
 /**
  * Récupère la liste de toutes les balades
+ * => on pourra ajouter un middleware de filtres
  */
 // router.get('/walks');
-
 
 /**
  * Récupère les détails d'une balade
  */
 // router.get('/walks/:id');
 
-
-/* je veux connaitre les balades d'un animal
-*/
-// router.get('/walks/query?animalid=id');
-
-
 /* je veux créer une nouvelle balade
-*/
+ */
 // router.post('/walks');
 
+/**
+ * Je veux mettre à jour une balade
+ */
+// router.patch('/walks/:id')
+
+/**
+ * Je veux supprimer une balade
+ */
+// router.delete('/walks/:id');
 
 export default walkRouter;

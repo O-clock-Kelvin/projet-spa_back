@@ -1,7 +1,7 @@
 /** @format */
 
-import express from 'express';
-import visitsController from '../controllers/visits.controller.js';
+import express, { Router } from 'express';
+// import visitsController from '../controllers/visits.controller.js';
 
 const visitRouter = express.Router();
 
@@ -11,18 +11,28 @@ const visitRouter = express.Router();
 
 /**
  * Récupère la liste de toutes les visites
+ * => on pourra appliquer des filtres plus tar
  */
 // router.get('/visits');
 
+/**
+ * Je veux créer une nouvelle visite
+ */
+// router.post('/visits)
 
-/* je veux connaitre les visites d'une box
-*/
-// router.get('/visits/query/?box=id');
+/**
+ * Je veux récupérer une visite en particulier
+ */
+// router.get('/visits/:id')
 
+/**
+ * Je veux mettre à jour une visite
+ */
+// router.patch('/visits/:id')
 
-
-/* je veux créer une nouvelle visite
-*/
-// router.post('/visits');
+/**
+ * Je veux supprimer une visite
+ */
+// router.delete('/visits/:id');
 
 export default visitRouter;

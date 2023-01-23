@@ -1,7 +1,7 @@
 /** @format */
 
 import express from 'express';
-import animalsController from '../controllers/animals.controller.js';
+// import animalsController from '../controllers/animals.controller.js';
 
 const animalRouter = express.Router();
 
@@ -11,8 +11,11 @@ const animalRouter = express.Router();
 
 /**
  * Récupère la liste des animaux
+ * Peut également inclure des filtres
+ * 
+ * => http://localhost:3001/v1/animals?volunteer_experience=BEGINNER&specie=CAT
  */
-// router.get('/animals');
+// router.get('/animals', filters, animalsController.getAnimals());
 
 
 /**
@@ -20,10 +23,6 @@ const animalRouter = express.Router();
  */
 // router.get('/animals/:id');
 
-
-/* je veux connaitre la liste des animaux avec un GROS gabarit
-*/
-// router.get('/animals/query?gabarit=GROS');
 
 
 /* je veux créer un nouvel animal
