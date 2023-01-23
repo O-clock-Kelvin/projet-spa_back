@@ -22,8 +22,18 @@ userRouter.get('/:id', async (req, res) => {
 	res.json(user);
 });
 
-// router.post();
-// router.patch()
-// router.get('/:id')
+/**
+ * Créer un nouvel utilisateur
+ */
+// router.post('/users);
 
+/**
+ * Mettre à jour un utilisateur
+ */
+// router.patch('/users/:id)
+
+/**
+ * Supprimer un utilisateur
+ * router.delete('/users/:id')
+ */
 export default userRouter;
