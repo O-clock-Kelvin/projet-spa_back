@@ -2,6 +2,8 @@
 
 import express from 'express';
 import usersController from '../controllers/users.controller.js';
+import validate from '../middlewares/validation.middleware.js';
+import userValidation from '../validations/user.validation.js';
 
 const userRouter = express.Router();
 
@@ -20,7 +22,11 @@ userRouter.get('/:id', usersController.getOne);
  * Créer un nouvel utilisateur
  */
 
-userRouter.post('/', usersController.create);
+userRouter.post(
+	'/',
+	validate(userValidation.create, 'body'),
+	usersController.create
+);
 /**
  * Mettre à jour un utilisateur
  * update
