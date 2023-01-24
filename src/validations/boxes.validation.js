@@ -17,10 +17,7 @@ const boxesValidation = {
 	}),
 
 	update: Joi.object({
-		type: Joi.string()
-			.uppercase()
-			.valid('CAT', 'DOG', 'OTHER')
-			.default('OTHER'),
+		type: Joi.string().uppercase().valid('CAT', 'DOG', 'OTHER'),
 		nbr_of_places: Joi.number().min(1).required(),
 		number: Joi.string().required(),
 	}),
