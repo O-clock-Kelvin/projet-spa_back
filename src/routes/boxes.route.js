@@ -4,6 +4,7 @@ import express from 'express';
 import boxesController from '../controllers/boxes.controller.js';
 import validate from '../middlewares/validation.middleware.js';
 import boxesValidation from '../validations/boxes.validation.js';
+import commonValidation from '../validations/common.validation.js';
 /**
  * Router qui gère l'ensemble des routes "boxes"
  */
@@ -23,7 +24,7 @@ boxRouter.get('/', boxesController.getAll);
 
 boxRouter.get(
 	'/:id/animals',
-	validate(boxesValidation.idParams, 'params'),
+	validate(commonValidation.idParams, 'params'),
 	boxesController.getAnimals
 );
 
@@ -32,7 +33,7 @@ boxRouter.get(
  */
 boxRouter.get(
 	'/:id',
-	validate(boxesValidation.idParams, 'params'),
+	validate(commonValidation.idParams, 'params'),
 	boxesController.getOne
 );
 
@@ -52,7 +53,7 @@ boxRouter.post(
  */
 boxRouter.patch(
 	'/:id',
-	validate(boxesValidation.idParams, 'params'),
+	validate(commonValidation.idParams, 'params'),
 	validate(boxesValidation.update, 'body'),
 	boxesController.update
 );
@@ -62,7 +63,7 @@ boxRouter.patch(
  */
 boxRouter.delete(
 	'/:id',
-	validate(boxesValidation.idParams, 'params'),
+	validate(commonValidation.idParams, 'params'),
 	boxesController.delete
 );
 

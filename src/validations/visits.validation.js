@@ -3,10 +3,6 @@
 import Joi from 'joi';
 
 const visitsValidation = {
-	idParams: Joi.object({
-		id: Joi.number().required(),
-	}),
-
 	create: Joi.object({
 		user_id: Joi.number().required(),
 		box_id: Joi.number().required(),

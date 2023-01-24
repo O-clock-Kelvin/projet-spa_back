@@ -3,6 +3,7 @@
 import express from 'express';
 import usersController from '../controllers/users.controller.js';
 import validate from '../middlewares/validation.middleware.js';
+import commonValidation from '../validations/common.validation.js';
 import userValidation from '../validations/user.validation.js';
 
 const userRouter = express.Router();
@@ -18,7 +19,7 @@ userRouter.get('/', usersController.getAllUsers);
 
 userRouter.get(
 	'/:id',
-	validate(userValidation.idParams, 'params'),
+	validate(commonValidation.idParams, 'params'),
 	usersController.getOne
 );
 
@@ -37,7 +38,7 @@ userRouter.post(
  */
 userRouter.patch(
 	'/:id',
-	validate(userValidation.idParams, 'params'),
+	validate(commonValidation.idParams, 'params'),
 	validate(userValidation.update, 'body'),
 	usersController.update
 );
@@ -48,7 +49,7 @@ userRouter.patch(
  */
 userRouter.delete(
 	'/:id',
-	validate(userValidation.idParams, 'params'),
+	validate(commonValidation.idParams, 'params'),
 	usersController.delete
 );
 

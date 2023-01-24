@@ -2,10 +2,6 @@
 import Joi from 'joi';
 
 const userValidation = {
-	idParams: Joi.object({
-		id: Joi.number().required(),
-	}),
-
 	create: Joi.object({
 		email: Joi.string().email().lowercase().required(),
 		password: Joi.string().min(8).required(),

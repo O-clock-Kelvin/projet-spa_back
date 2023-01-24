@@ -3,10 +3,6 @@
 import Joi from 'joi';
 
 const boxesValidation = {
-	idParams: Joi.object({
-		id: Joi.number().required(),
-	}),
-
 	create: Joi.object({
 		type: Joi.string()
 			.uppercase()

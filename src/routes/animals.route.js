@@ -2,6 +2,9 @@
 
 import express from 'express';
 import animalsController from '../controllers/animal.controller.js';
+import validate from '../middlewares/validation.middleware.js';
+import animalsValidation from '../validations/animals.validation.js';
+import commonValidation from '../validations/common.validation.js';
 
 const animalRouter = express.Router();
 
@@ -12,31 +15,43 @@ const animalRouter = express.Router();
 /**
  * Récupère la liste des animaux
  * Peut également inclure des filtres
- * 
+ *
  * => http://localhost:3001/v1/animals?volunteer_experience=BEGINNER&specie=CAT
  */
 animalRouter.get('/', animalsController.getAll);
 
-
 /**
  * Récupère l'animal sélectionné
  */
-animalRouter.get('/:id', animalsController.getOne);
-
+animalRouter.get(
+	'/:id',
+	validate(commonValidation.idParams, 'params'),
+	animalsController.getOne
+);
 
 /* je veux créer un nouvel animal
-*/
-animalRouter.post('/', animalsController.create); 
-
+ */
+animalRouter.post(
+	'/',
+	validate(animalsValidation.create, 'body'),
+	animalsController.create
+);
 
 /* je veux mettre à jour un animal en particulier
-*/
-animalRouter.patch('/:id', animalsController.update);
-
+ */
+animalRouter.patch(
+	'/:id',
+	validate(commonValidation.idParams, 'params'),
+	validate(animalsValidation.update, 'body'),
+	animalsController.update
+);
 
 /* je veux supprimer un animal en particulier
-*/
-animalRouter.delete('/:id', animalsController.delete);
-
+ */
+animalRouter.delete(
+	'/:id',
+	validate(commonValidation.idParams, 'params'),
+	animalsController.delete
+);
 
 export default animalRouter;
