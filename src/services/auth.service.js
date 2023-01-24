@@ -29,7 +29,7 @@ const authService = {
 	/**
 	 * @description Générate a signed JWT with provided data
 	 * @param {object} data
-	 * @returns {string} signed JWT
+	 * @returns {Promise<string>} signed JWT
 	 * @example authService.generateJWT({
 	 * id:1,
 	 * name:'John',
