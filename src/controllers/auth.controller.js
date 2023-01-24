@@ -10,7 +10,8 @@ const authController = {
 	 * @param {string} password
 	 * @returns {Promise<string>} signed JWT
 	 */
-	login: async (email, password) => {
+	login: async (req, res) => {
+		const { email, password } = req.body;
 		try {
 			const user = await prismaClient.user.findUnique({
 				where: {
@@ -25,22 +26,24 @@ const authController = {
 				);
 
 				if (passwordValidation) {
-					const signedJwt = authService.generateJWT({
+					const signedJwt = await authService.generateJWT({
 						id: user.id,
 						admin: user.admin ?? false,
 						firstName: user.firstname,
 						experience: user.experience ?? 'BEGINNER',
 					});
-					return signedJwt;
+					// on retourne un JWT signé pour vérifier sa validité
+					res.json({ token: signedJwt });
 				}
-				return null;
+				// si le mot de passe n'est pas valide
+				res.status(401).json();
 			}
-			return null;
-			// que faire quand pas d'utilisateur ?
+			// si l'email n'est associé à aucun compte
+			res.status(401).json();
 		} catch (error) {
 			/** @todo Error handling */
 			console.log(error);
-			return null;
+			throw new Error('Error');
 		}
 	},
 };
