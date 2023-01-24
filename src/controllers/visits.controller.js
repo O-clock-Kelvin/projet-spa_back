@@ -38,8 +38,8 @@ const visitsController = {
 		try {
 			const createdVisit = await prismaClient.visit.create({
 				data: {
-					user_id: req.body.user_id,
-					box_id: req.body.box_id,
+					user_id: Number(req.body.user_id),
+					box_id: Number(req.body.box_id),
 					comment: req.body.comment,
 					date: new Date(),
 				},
