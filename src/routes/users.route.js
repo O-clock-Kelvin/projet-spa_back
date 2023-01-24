@@ -2,6 +2,9 @@
 
 import express from 'express';
 import usersController from '../controllers/users.controller.js';
+import validate from '../middlewares/validation.middleware.js';
+import commonValidation from '../validations/common.validation.js';
+import userValidation from '../validations/user.validation.js';
 
 const userRouter = express.Router();
 
@@ -12,18 +15,42 @@ const userRouter = express.Router();
 /**
  * Récupère toutes les données utilisateurs
  */
-userRouter.get('/', async (req, res) => {
-	const data = await usersController.getAllUsers();
-	res.json(data);
-});
+userRouter.get('/', usersController.getAllUsers);
 
-userRouter.get('/:id', async (req, res) => {
-	const user = await usersController.getUser(req.params.id);
-	res.json(user);
-});
+userRouter.get(
+	'/:id',
+	validate(commonValidation.idParams, 'params'),
+	usersController.getOne
+);
 
-// router.post();
-// router.patch()
-// router.get('/:id')
+/**
+ * Créer un nouvel utilisateur
+ */
+
+userRouter.post(
+	'/',
+	validate(userValidation.create, 'body'),
+	usersController.create
+);
+/**
+ * Mettre à jour un utilisateur
+ * update
+ */
+userRouter.patch(
+	'/:id',
+	validate(commonValidation.idParams, 'params'),
+	validate(userValidation.update, 'body'),
+	usersController.update
+);
+
+/**
+ * Supprimer un utilisateur
+ * delete
+ */
+userRouter.delete(
+	'/:id',
+	validate(commonValidation.idParams, 'params'),
+	usersController.delete
+);
 
 export default userRouter;
