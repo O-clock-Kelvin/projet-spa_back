@@ -1,7 +1,7 @@
 /** @format */
 
 import express from 'express';
-// import animalsController from '../controllers/animals.controller.js';
+import animalsController from '../controllers/animal.controller.js';
 
 const animalRouter = express.Router();
 
@@ -15,29 +15,28 @@ const animalRouter = express.Router();
  * 
  * => http://localhost:3001/v1/animals?volunteer_experience=BEGINNER&specie=CAT
  */
-// router.get('/animals', filters, animalsController.getAnimals());
+animalRouter.get('/', animalsController.getAll);
 
 
 /**
  * Récupère l'animal sélectionné
  */
-// router.get('/animals/:id');
-
+animalRouter.get('/:id', animalsController.getOne);
 
 
 /* je veux créer un nouvel animal
 */
-// router.post('/animals');
+animalRouter.post('/', animalsController.create); 
 
 
 /* je veux mettre à jour un animal en particulier
 */
-// router.patch('/animals/:id');
+animalRouter.patch('/:id', animalsController.update);
 
 
-/* je veux un status 204
+/* je veux supprimer un animal en particulier
 */
-// router.delete('/animals/:id');
+animalRouter.delete('/:id', animalsController.delete);
 
 
 export default animalRouter;
