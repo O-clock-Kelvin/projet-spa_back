@@ -16,7 +16,11 @@ const userRouter = express.Router();
  */
 userRouter.get('/', usersController.getAllUsers);
 
-userRouter.get('/:id', usersController.getOne);
+userRouter.get(
+	'/:id',
+	validate(userValidation.idParams, 'params'),
+	usersController.getOne
+);
 
 /**
  * Créer un nouvel utilisateur
@@ -31,12 +35,21 @@ userRouter.post(
  * Mettre à jour un utilisateur
  * update
  */
-userRouter.patch('/:id', usersController.update);
+userRouter.patch(
+	'/:id',
+	validate(userValidation.idParams, 'params'),
+	validate(userValidation.update, 'body'),
+	usersController.update
+);
 
 /**
  * Supprimer un utilisateur
  * delete
  */
-userRouter.delete('/:id', usersController.delete);
+userRouter.delete(
+	'/:id',
+	validate(userValidation.idParams, 'params'),
+	usersController.delete
+);
 
 export default userRouter;
