@@ -6,6 +6,7 @@ const animalsValidation = {
 	create: Joi.object({
 		species: Joi.string().uppercase().valid('CAT', 'DOG', 'OTHER').required(),
 		name: Joi.string().required(),
+		bio: Joi.string(),
 		url_image: Joi.string().uri(),
 		gender: Joi.string().uppercase().valid('MALE', 'FEMALE').required(),
 		size: Joi.string().uppercase().valid('SMALL', 'MEDIUM', 'BIG').required(),
@@ -19,6 +20,7 @@ const animalsValidation = {
 	update: Joi.object({
 		species: Joi.string().uppercase().valid('CAT', 'DOG', 'OTHER'),
 		name: Joi.string(),
+		bio: Joi.string(),
 		url_image: Joi.string().uri(),
 		gender: Joi.string().uppercase().valid('MALE', 'FEMALE'),
 		size: Joi.string().uppercase().valid('SMALL', 'MEDIUM', 'BIG'),
