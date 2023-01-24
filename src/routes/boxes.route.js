@@ -2,7 +2,8 @@
 
 import express from 'express';
 import boxesController from '../controllers/boxes.controller.js';
-
+import validate from '../middlewares/validation.middleware.js';
+import boxesValidation from '../validations/boxes.validation.js';
 /**
  * Router qui gère l'ensemble des routes "boxes"
  */
@@ -20,28 +21,49 @@ boxRouter.get('/', boxesController.getAll);
  */
 // router.get('/boxes/:id/animals');
 
-boxRouter.get('/:id/animals', boxesController.getAnimals);
+boxRouter.get(
+	'/:id/animals',
+	validate(boxesValidation.idParams, 'params'),
+	boxesController.getAnimals
+);
 
 /**
  * Récupère une box
  */
-boxRouter.get('/:id', boxesController.getOne);
+boxRouter.get(
+	'/:id',
+	validate(boxesValidation.idParams, 'params'),
+	boxesController.getOne
+);
 
 /**
  * Créer un nouveau box
  * => pas utile pour la v1
  */
-boxRouter.post('/', boxesController.create);
+boxRouter.post(
+	'/',
+	validate(boxesValidation.create, 'body'),
+	boxesController.create
+);
 
 /**
  * Mettre à jour un box
  * => pas utile pour la v1
  */
-boxRouter.patch('/:id', boxesController.update);
+boxRouter.patch(
+	'/:id',
+	validate(boxesValidation.idParams, 'params'),
+	validate(boxesValidation.update, 'body'),
+	boxesController.update
+);
 
 /**
  * Supprimer un box
  */
-boxRouter.delete('/:id', boxesController.delete);
+boxRouter.delete(
+	'/:id',
+	validate(boxesValidation.idParams, 'params'),
+	boxesController.delete
+);
 
 export default boxRouter;
