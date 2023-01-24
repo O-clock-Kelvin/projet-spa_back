@@ -1,7 +1,7 @@
 /** @format */
 
 import express from 'express';
- import visitsController from '../controllers/visits.controller.js';
+import visitsController from '../controllers/visits.controller.js';
 
 const visitRouter = express.Router();
 
@@ -15,7 +15,6 @@ const visitRouter = express.Router();
  */
 // router.get('/visits');
 visitRouter.get('/', visitsController.getAll);
-
 
 /**
  * Je veux créer une nouvelle visite
@@ -39,8 +38,6 @@ visitRouter.patch('/:id', visitsController.update);
 /**
  * Je veux supprimer une visite
  */
-// router.delete('/visits/:id');
-// visitRouter.delete('/visits/:id', visitsController.delete);
-
+visitRouter.delete('/:id', visitsController.delete);
 
 export default visitRouter;
