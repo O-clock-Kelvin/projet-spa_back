@@ -3,6 +3,7 @@
 import express from 'express';
 import visitsController from '../controllers/visits.controller.js';
 import validate from '../middlewares/validation.middleware.js';
+import commonValidation from '../validations/common.validation.js';
 import visitsValidation from '../validations/visits.validation.js';
 
 const visitRouter = express.Router();
@@ -31,7 +32,7 @@ visitRouter.post(
  */
 visitRouter.get(
 	'/:id',
-	validate(visitsValidation.idParams, 'params'),
+	validate(commonValidation.idParams, 'params'),
 	visitsController.getOne
 );
 
@@ -40,7 +41,7 @@ visitRouter.get(
  */
 visitRouter.patch(
 	'/:id',
-	validate(visitsValidation.idParams, 'params'),
+	validate(commonValidation.idParams, 'params'),
 	validate(visitsValidation.update, 'body'),
 	visitsController.update
 );
@@ -50,7 +51,7 @@ visitRouter.patch(
  */
 visitRouter.delete(
 	'/:id',
-	validate(visitsValidation.idParams),
+	validate(commonValidation.idParams),
 	visitsController.delete
 );
 
