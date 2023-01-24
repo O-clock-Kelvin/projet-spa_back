@@ -1,6 +1,7 @@
 /** @format */
 
 import express from 'express';
+import walksController from '../controllers/walks.controller.js';
 // import walksController from '../controllers/walks.controller.js';
 
 const walkRouter = express.Router();
@@ -13,25 +14,25 @@ const walkRouter = express.Router();
  * Récupère la liste de toutes les balades
  * => on pourra ajouter un middleware de filtres
  */
-// router.get('/walks');
+walkRouter.get('/', walksController.getAll);
 
 /**
  * Récupère les détails d'une balade
  */
-// router.get('/walks/:id');
+walkRouter.get('/:id', walksController.getOne);
 
 /* je veux créer une nouvelle balade
  */
-// router.post('/walks');
+walkRouter.post('/', walksController.create);
 
 /**
  * Je veux mettre à jour une balade
  */
-// router.patch('/walks/:id')
+walkRouter.patch('/:id', walksController.update);
 
 /**
  * Je veux supprimer une balade
  */
-// router.delete('/walks/:id');
+walkRouter.delete('/:id', walksController.delete);
 
 export default walkRouter;
