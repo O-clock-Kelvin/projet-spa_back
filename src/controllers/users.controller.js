@@ -1,14 +1,16 @@
 /** @format */
 
 import prismaClient from '../prisma.js';
+import APIError from '../services/APIError.service.js';
 import authService from '../services/auth.service.js';
 
 const usersController = {
 	/**
 	 * Méthode pour récupérer tous les utilisateurs en base de donnée
 	 */
-	getAllUsers: async (req, res) => {
+	getAllUsers: async (req, res, next) => {
 		try {
+
 			const users = await prismaClient.user.findMany({
 				// la fonction d'exclusion de champs n'existe pas avec prisma à l'heure actuelle
 				// une issue est en cours pour ajouter cette fonction: https://github.com/prisma/prisma/issues/5042
@@ -24,23 +26,25 @@ const usersController = {
 					url_image: true,
 				},
 			});
-			res.json(users);
+			res.json(users || []);
 		} catch (error) {
-			/**
-			 * @todo error handling
-			 */
-			throw new Error(error);
+			next(
+				new APIError({
+					error,
+				})
+			);
 		}
 	},
 
 	/**
 	 * Méthode pour récupérer un utilisateur en particuliers
 	 */
-	getOne: async (req, res) => {
+
+	getOne: async (req, res, next) => {
 		try {
 			const user = await prismaClient.user.findUnique({
 				where: {
-					id: Number(req.params.id), // on converti l'id en number car il arrive depuis req.params en string
+					id: req.params.id, // on converti l'id en number car il arrive depuis req.params en string
 				},
 				select: {
 					id: true,
@@ -54,19 +58,25 @@ const usersController = {
 					url_image: true,
 				},
 			});
-			res.json(user);
+			if (user) {
+				res.json(user);
+			} else {
+				res.status(404).json([]);
+			}
 		} catch (error) {
-			/**
-			 * @todo error handling
-			 */
-			throw new Error(error);
+			next(
+				// par défaut: code d'erreur 500, message (envoyé au client):"INTERNAL_ERROR", extendMessage:error
+				new APIError({
+					error,
+				})
+			);
 		}
 	},
 
 	/**
 	 * Méthode pour créer un nouvel utilisateur
 	 */
-	create: async (req, res) => {
+	create: async (req, res, next) => {
 		try {
 			// on crypte le mot de passe
 			const hashedPassword = await authService.generateHashedPassword(
@@ -92,17 +102,18 @@ const usersController = {
 			// on renvoie les données créées
 			res.status(201).json(createdUser);
 		} catch (error) {
-			/**
-			 * @todo error handling
-			 */
-			throw new Error(error);
+			next(
+				new APIError({
+					error,
+				})
+			);
 		}
 	},
 
 	/**
 	 * Méthode pour mettre a jour un utilisateur spécifique
 	 */
-	update: async (req, res) => {
+	update: async (req, res, next) => {
 		try {
 			// si on cherche à modifier le mot de passe
 			let newPassword;
@@ -131,17 +142,18 @@ const usersController = {
 			// on retourne l'utilisateur mis à jour
 			res.json(updatedUser);
 		} catch (error) {
-			/**
-			 * @todo error handling
-			 */
-			throw new Error(error);
+			next(
+				new APIError({
+					error,
+				})
+			);
 		}
 	},
 
 	/**
 	 * Méthode pour supprimer un utilisateur
 	 */
-	delete: async (req, res) => {
+	delete: async (req, res, next) => {
 		try {
 			// on delete l'utilisateur par son id
 			await prismaClient.user.delete({
@@ -153,10 +165,11 @@ const usersController = {
 			// on renvoie un status 204 - no content pour signaler au front que l'utilisateur a bien été supprimé.
 			res.status(204).json([]);
 		} catch (error) {
-			/**
-			 * @todo error handling
-			 */
-			throw new Error(error);
+			next(
+				new APIError({
+					error,
+				})
+			);
 		}
 	},
 };

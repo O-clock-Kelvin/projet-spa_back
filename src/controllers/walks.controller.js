@@ -1,21 +1,23 @@
 /** @format */
 
 import prismaClient from '../prisma.js';
+import APIError from '../services/APIError.service.js';
 
 const walksController = {
-	getAll: async (req, res) => {
+	getAll: async (req, res, next) => {
 		try {
 			const walks = await prismaClient.walk.findMany();
-			res.json(walks);
+			res.json(walks || []);
 		} catch (error) {
-			/**
-			 * @todo error handling
-			 */
-			throw new Error(error);
+			next(
+				new APIError({
+					error,
+				})
+			);
 		}
 	},
 
-	getOne: async (req, res) => {
+	getOne: async (req, res, next) => {
 		const walkId = req.params.id;
 		try {
 			// si l'animal existe, on soumet la requete en bdd//
@@ -26,19 +28,20 @@ const walksController = {
 			});
 			// si l'animal n'est pas trouvé en bdd on passe au middleware handlerError
 			if (!getWalk) {
-				res.status(404).json();
+				res.status(404).json([]);
 			} else {
 				res.json(getWalk);
 			}
 		} catch (error) {
-			/**
-			 * @todo error handling
-			 */
-			throw new Error(error);
+			next(
+				new APIError({
+					error,
+				})
+			);
 		}
 	},
 
-	create: async (req, res) => {
+	create: async (req, res, next) => {
 		try {
 			const walk = req.body;
 			const createWalk = await prismaClient.walk.create({
@@ -53,14 +56,15 @@ const walksController = {
 			// on renvoie les données créées
 			res.status(201).json(createWalk);
 		} catch (error) {
-			/**
-			 * @todo error handling
-			 */
-			throw new Error(error);
+			next(
+				new APIError({
+					error,
+				})
+			);
 		}
 	},
 
-	update: async (req, res) => {
+	update: async (req, res, next) => {
 		try {
 			const walkId = req.params.id;
 
@@ -73,14 +77,15 @@ const walksController = {
 			});
 			res.json(updatedWalk);
 		} catch (error) {
-			/**
-			 * @todo error handling
-			 */
-			throw new Error(error);
+			next(
+				new APIError({
+					error,
+				})
+			);
 		}
 	},
 
-	delete: async (req, res) => {
+	delete: async (req, res, next) => {
 		try {
 			const walkId = req.params.id;
 			await prismaClient.animal.delete({
@@ -90,10 +95,11 @@ const walksController = {
 			});
 			res.status(204).json();
 		} catch (error) {
-			/**
-			 * @todo error handling
-			 */
-			throw new Error(error);
+			next(
+				new APIError({
+					error,
+				})
+			);
 		}
 	},
 };

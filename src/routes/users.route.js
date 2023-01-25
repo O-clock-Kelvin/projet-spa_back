@@ -15,6 +15,7 @@ const userRouter = express.Router();
 /**
  * Récupère toutes les données utilisateurs
  */
+
 userRouter.get('/', usersController.getAllUsers);
 
 userRouter.get(

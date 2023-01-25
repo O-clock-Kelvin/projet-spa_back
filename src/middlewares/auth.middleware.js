@@ -28,10 +28,10 @@ const authMiddleWare = (req, res, next) => {
 			};
 			next();
 		} catch (jwtVerificationError) {
-			res.status(401).send('Invalid JWT');
+			res.status(401).json({ message: 'INVALID_TOKEN' });
 		}
 	} else {
-		res.status(401).send('Unauthorized');
+		res.status(401).send({ message: 'MISSING_TOKEN' });
 	}
 };
 export default authMiddleWare;

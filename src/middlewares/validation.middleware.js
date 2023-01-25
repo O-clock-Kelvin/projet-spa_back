@@ -1,5 +1,6 @@
 /** @format */
 import Joi from 'joi';
+import APIError from '../services/APIError.service.js';
 
 const validate = (schema, key) => (req, res, next) => {
 	try {
@@ -7,11 +8,11 @@ const validate = (schema, key) => (req, res, next) => {
 		req[key] = validatedValues;
 		next();
 	} catch (error) {
-		/**
-		 * @todo error handling
-		 */
-		console.log('ERROR', error);
-		throw new Error(error);
+		next(
+			new APIError({
+				error,
+			})
+		);
 	}
 };
 
