@@ -41,6 +41,7 @@ model Animal{
   species String
   name String
   url_image String?
+  bio String?
   gender String
   size String
   volunteer_experience String @default("BEGINNER")

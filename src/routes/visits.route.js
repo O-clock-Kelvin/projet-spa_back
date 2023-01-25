@@ -2,6 +2,9 @@
 
 import express from 'express';
 import visitsController from '../controllers/visits.controller.js';
+import validate from '../middlewares/validation.middleware.js';
+import commonValidation from '../validations/common.validation.js';
+import visitsValidation from '../validations/visits.validation.js';
 
 const visitRouter = express.Router();
 
@@ -13,31 +16,43 @@ const visitRouter = express.Router();
  * Récupère la liste de toutes les visites
  * => on pourra appliquer des filtres plus tar
  */
-// router.get('/visits');
 visitRouter.get('/', visitsController.getAll);
 
 /**
  * Je veux créer une nouvelle visite
  */
-// router.post('/visits)
-visitRouter.post('/', visitsController.create);
+visitRouter.post(
+	'/',
+	validate(visitsValidation.create, 'body'),
+	visitsController.create
+);
 
 /**
  * Je veux récupérer une visite en particulier
  */
-// router.get('/visits/:id')
-
-visitRouter.get('/:id', visitsController.getOne);
+visitRouter.get(
+	'/:id',
+	validate(commonValidation.idParams, 'params'),
+	visitsController.getOne
+);
 
 /**
  * Je veux mettre à jour une visite
  */
-// router.patch('/visits/:id')
-visitRouter.patch('/:id', visitsController.update);
+visitRouter.patch(
+	'/:id',
+	validate(commonValidation.idParams, 'params'),
+	validate(visitsValidation.update, 'body'),
+	visitsController.update
+);
 
 /**
  * Je veux supprimer une visite
  */
-visitRouter.delete('/:id', visitsController.delete);
+visitRouter.delete(
+	'/:id',
+	validate(commonValidation.idParams),
+	visitsController.delete
+);
 
 export default visitRouter;

@@ -1,7 +1,9 @@
 /** @format */
 
 import express from 'express';
-// import walksController from '../controllers/walks.controller.js';
+import walksController from '../controllers/walks.controller.js';
+import validate from '../middlewares/validation.middleware.js';
+import commonValidation from '../validations/common.validation.js';
 
 const walkRouter = express.Router();
 
@@ -13,25 +15,37 @@ const walkRouter = express.Router();
  * Récupère la liste de toutes les balades
  * => on pourra ajouter un middleware de filtres
  */
-// router.get('/walks');
+walkRouter.get('/', walksController.getAll);
 
 /**
  * Récupère les détails d'une balade
  */
-// router.get('/walks/:id');
+walkRouter.get(
+	'/:id',
+	validate(commonValidation.idParams, 'params'),
+	walksController.getOne
+);
 
 /* je veux créer une nouvelle balade
  */
-// router.post('/walks');
+walkRouter.post('/', walksController.create);
 
 /**
  * Je veux mettre à jour une balade
  */
-// router.patch('/walks/:id')
+walkRouter.patch(
+	'/:id',
+	validate(commonValidation.idParams, 'params'),
+	walksController.update
+);
 
 /**
  * Je veux supprimer une balade
  */
-// router.delete('/walks/:id');
+walkRouter.delete(
+	'/:id',
+	validate(commonValidation.idParams, 'params'),
+	walksController.delete
+);
 
 export default walkRouter;
