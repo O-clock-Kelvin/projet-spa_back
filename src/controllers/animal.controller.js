@@ -1,26 +1,28 @@
 /** @format */
 
 import prismaClient from '../prisma.js';
+import APIError from '../services/APIError.service.js';
 
 const animalsController = {
 	/**
 	 * Méthode pour récupérer tous les animaux en base de donnée
 	 */
-	getAll: async (req, res) => {
+	getAll: async (req, res, next) => {
 		try {
 			const animals = await prismaClient.animal.findMany();
-			res.json(animals);
+			res.json(animals || []);
 		} catch (error) {
-			/**
-			 * @todo error handling
-			 */
-			throw new Error(error);
+			next(
+				new APIError({
+					error,
+				})
+			);
 		}
 	},
 	/**
 	 * Méthode pour récupérer un animal en particuliers
 	 */
-	getOne: async (req, res) => {
+	getOne: async (req, res, next) => {
 		const animalId = req.params.id;
 		try {
 			// si l'animal existe, on soumet la requete en bdd//
@@ -31,21 +33,22 @@ const animalsController = {
 			});
 			// si l'animal n'est pas trouvé en bdd on passe au middleware handlerError
 			if (!getAnimal) {
-				res.status(404).json();
+				res.status(404).json([]);
 			} else {
 				res.json(getAnimal);
 			}
 		} catch (error) {
-			/**
-			 * @todo error handling
-			 */
-			throw new Error(error);
+			next(
+				new APIError({
+					error,
+				})
+			);
 		}
 	},
 	/**
 	 * Méthode pour créer un nouvel animal
 	 */
-	create: async (req, res) => {
+	create: async (req, res, next) => {
 		try {
 			const animal = req.body;
 
@@ -64,16 +67,17 @@ const animalsController = {
 			// on renvoie les données créées
 			res.status(201).json(createAnimal);
 		} catch (error) {
-			/**
-			 * @todo error handling
-			 */
-			throw new Error(error);
+			next(
+				new APIError({
+					error,
+				})
+			);
 		}
 	},
 	/**
 	 * Méthode pour mettre a jour un animal spécifique
 	 */
-	update: async (req, res) => {
+	update: async (req, res, next) => {
 		try {
 			// on modifie l'animal
 			const animalId = req.params.id;
@@ -88,13 +92,14 @@ const animalsController = {
 			});
 			res.json(updatedAnimal);
 		} catch (error) {
-			/**
-			 * @todo error handling
-			 */
-			throw new Error(error);
+			next(
+				new APIError({
+					error,
+				})
+			);
 		}
 	},
-	delete: async (req, res) => {
+	delete: async (req, res, next) => {
 		try {
 			const animalId = req.params.id;
 			await prismaClient.animal.delete({
@@ -104,10 +109,11 @@ const animalsController = {
 			});
 			res.status(204).json();
 		} catch (error) {
-			/**
-			 * @todo error handling
-			 */
-			throw new Error(error);
+			next(
+				new APIError({
+					error,
+				})
+			);
 		}
 	},
 };
