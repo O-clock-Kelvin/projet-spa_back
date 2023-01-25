@@ -10,10 +10,23 @@ const usersController = {
 	 */
 	getAllUsers: async (req, res, next) => {
 		try {
-			const users = await prismaClient.user.findMany();
 
-			// si des données sont présentes dans la base de donnée, sinon on envoie un tableau vide;
-			res.json(users || []);
+			const users = await prismaClient.user.findMany({
+				// la fonction d'exclusion de champs n'existe pas avec prisma à l'heure actuelle
+				// une issue est en cours pour ajouter cette fonction: https://github.com/prisma/prisma/issues/5042
+				select: {
+					id: true,
+					email: true,
+					password: false, // on retire le password
+					firstname: true,
+					name: true,
+					admin: true,
+					experience: true,
+					phone_number: true,
+					url_image: true,
+				},
+			});
+			res.json(users || []);
 		} catch (error) {
 			next(
 				new APIError({
@@ -32,6 +45,17 @@ const usersController = {
 			const user = await prismaClient.user.findUnique({
 				where: {
 					id: req.params.id, // on converti l'id en number car il arrive depuis req.params en string
+				},
+				select: {
+					id: true,
+					email: true,
+					password: false, // on retire le password
+					firstname: true,
+					name: true,
+					admin: true,
+					experience: true,
+					phone_number: true,
+					url_image: true,
 				},
 			});
 			if (user) {
