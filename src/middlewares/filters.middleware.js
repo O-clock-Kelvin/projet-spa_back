@@ -2,6 +2,7 @@
 
 import qs from 'qs';
 import Joi from 'joi';
+import APIError from '../services/APIError.service.js';
 
 /**
  * On crée une fonction qui retourne une fonction, c'est l'équivalent formatté de ce code:
@@ -37,42 +38,32 @@ const filters = (schema) => (req, res, next) => {
 	 * en cas de sort != array, traiter le truc
 	 */
 
+	
+
 	if (parsedQuery.sort) {
 		// notre paramètre "sort" arrive dans cette forme " sort: ['-createdAt', ' id'] " => traduction: je veux trier par date décroissante et par id.
 		// On souhaite obtenir un objet de ce format: {createdAt:"desc", id:"asc"}
 		let sort = {};
 
-		if (schema) {
-			// si un schema Joi est passé en paramètre du middleware, on récupère les champs du schema sans les valider
-			const schemaDescription = schema.describe();
+		// if (schema) {
 
-			// si l'élément de sorting est présent dans le schema, on le traite
-			parsedQuery.sort.forEach((sortParam) => {
-				sortParam.replaceAll(' ', ''); // on retire tous les espaces de la string
-				if (schemaDescription.keys[sortParam.replace('-', '')]) {
-					if (sortParam.startsWith('-')) {
-						// si l'élement commence par "-", celà signfie qu'on cherche un ordre descendant
-						sort = { ...sort, [sortParam.replace('-', '')]: 'desc' }; // on vient ajouter l'élément à l'objet, la notation [item] permet de ne pas récupérer la valeur de la variable mais son nom, puis on retire le "-"" de son nom
-					} else {
-						// si l'élément ne commence pas par "-", celà signifie qu'on cherche un ordre croissant
-						sort = { ...sort, [sortParam]: 'asc' };
-					}
-				} // {createdAt:"desc", id:"asc"} => pourra être utilisé dans notre requête prisma
-			});
-		} else {
-			// si il n'y a pas de schema en paramètre
-			parsedQuery.sort.forEach((sortParam) => {
-				sortParam.replaceAll(' ', '');
-				if (sortParam.startsWith('-')) {
+		// si un schema Joi est passé en paramètre du middleware, on récupère les champs du schema sans les valider
+		const schemaDescription = schema ? schema.describe() : undefined;
+
+		if (typeof parsedQuery.sort === 'string') {
+			const itemName = parsedQuery.sort.replace('-', '').replaceAll(' ', '');
+			if (schemaDescription === undefined || schemaDescription.keys[itemName]) {
+				if (parsedQuery.sort.startsWith('-')) {
 					// si l'élement commence par "-", celà signfie qu'on cherche un ordre descendant
-					sort = { ...sort, [sortParam.replace('-', '')]: 'desc' }; // on vient ajouter l'élément à l'objet, la notation [item] permet de ne pas récupérer la valeur de la variable mais son nom, puis on retire le "-"" de son nom
-				} else {
-					// si l'élément ne commence pas par "-", celà signifie qu'on cherche un ordre croissant
-					sort = { ...sort, [sortParam]: 'asc' };
+					sort = { [parsedQuery.sort.replace('-', '')]: 'desc' }; // on vient ajouter l'élément à l'objet, la notation [item] permet de ne pas récupérer la valeur de la variable mais son nom, puis on retire le "-"" de son nom
 				}
-			});
+				// si l'élément ne commence pas par "-", celà signifie qu'on cherche un ordre croissant
+				sort = { [parsedQuery.sort.replaceAll(' ', '')]: 'asc' };
+			} // {createdAt:"desc", id:"asc"} => pourra être utilisé dans notre requête prisma
+		} else {
+			throw new APIError({ code: 400, message: 'INVALID_SORT_PARAMETER' });
 		}
-		// on assigne le tableau créé à l'objet de requête qui sera passé au prochain middleware ou à la route
+
 		req.sort = sort; // => req.sort = {createdAt:"desc", id:"asc"}, pourra être utilisé dans prisma
 	}
 

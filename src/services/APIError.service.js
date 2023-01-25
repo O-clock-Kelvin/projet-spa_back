@@ -14,7 +14,7 @@ class APIError extends Error {
 		this.error = errorObject.error;
 		this.code = errorObject.code || 500;
 		this.message = errorObject.message || 'INTERNAL_ERROR';
-		this.stack = errorObject.error.stack;
+		this.stack = errorObject.error ? errorObject.error.stack : undefined;
 
 		// on vient utiliser cette methode pour savoir si on connait le type d'erreur, auquel cas on pourra la traiter différemment
 		this.handleErrorType();

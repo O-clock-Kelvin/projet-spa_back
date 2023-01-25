@@ -5,8 +5,15 @@ import APIError from '../services/APIError.service.js';
 
 const boxesController = {
 	getAll: async (req, res, next) => {
+		console.log(req.sort);
 		try {
-			const boxes = await prismaClient.box.findMany();
+			const boxes = await prismaClient.box.findMany({
+				where: req.filters,
+				take: req.pagination.take,
+				skip: req.pagination.skip,
+				orderBy: req.sort,
+			});
+
 			res.json(boxes || []);
 		} catch (error) {
 			next(
