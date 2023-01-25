@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
 import v1Router from './routes/router.js';
+import errorHandler from './services/errorHandler.js';
 
 // on charge les variables d'environnement
 dotenv.config();
@@ -20,3 +21,4 @@ app.listen(process.env.PORT, () => {
 
 
 app.use('/v1', v1Router);
+app.use(errorHandler.status_404);
