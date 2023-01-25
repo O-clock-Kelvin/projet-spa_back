@@ -23,6 +23,7 @@ const filters = (schema) => (req, res, next) => {
 	 * On vient convertir la string de requête(ex: /v1/users?country=france&email[contains]=@gmail.com&sort=-createdAt,id&skip=10&take=10&include=tags,posts) en objet
 	 * on parse req.query pour récupérer ses paramètres, puis les transformer en objet => le paquet "qs" s'en occupe pour nous
 	 */
+
 	const parsedQuery = qs.parse(req.query, {
 		depth: 2, // pour la sécurité, la profondeur maximale des tableaux est de 2, cf doc de QS
 		comma: true, // on convert les arguments séparés par des virgules en tableau ex sort=-createdAt,id => ['-createdAt',' id']
@@ -38,8 +39,6 @@ const filters = (schema) => (req, res, next) => {
 	 * en cas de sort != array, traiter le truc
 	 */
 
-	
-
 	if (parsedQuery.sort) {
 		// notre paramètre "sort" arrive dans cette forme " sort: ['-createdAt', ' id'] " => traduction: je veux trier par date décroissante et par id.
 		// On souhaite obtenir un objet de ce format: {createdAt:"desc", id:"asc"}
@@ -52,13 +51,15 @@ const filters = (schema) => (req, res, next) => {
 
 		if (typeof parsedQuery.sort === 'string') {
 			const itemName = parsedQuery.sort.replace('-', '').replaceAll(' ', '');
+
 			if (schemaDescription === undefined || schemaDescription.keys[itemName]) {
 				if (parsedQuery.sort.startsWith('-')) {
 					// si l'élement commence par "-", celà signfie qu'on cherche un ordre descendant
-					sort = { [parsedQuery.sort.replace('-', '')]: 'desc' }; // on vient ajouter l'élément à l'objet, la notation [item] permet de ne pas récupérer la valeur de la variable mais son nom, puis on retire le "-"" de son nom
+					sort = { [itemName]: 'desc' }; // on vient ajouter l'élément à l'objet, la notation [item] permet de ne pas récupérer la valeur de la variable mais son nom, puis on retire le "-"" de son nom
+				} else {
+					sort = { [itemName]: 'asc' };
 				}
 				// si l'élément ne commence pas par "-", celà signifie qu'on cherche un ordre croissant
-				sort = { [parsedQuery.sort.replaceAll(' ', '')]: 'asc' };
 			} // {createdAt:"desc", id:"asc"} => pourra être utilisé dans notre requête prisma
 		} else {
 			throw new APIError({ code: 400, message: 'INVALID_SORT_PARAMETER' });

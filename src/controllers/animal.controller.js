@@ -29,7 +29,6 @@ const animalsController = {
 				where: req.filters,
 				include: includeTags,
 				orderBy: req.sort,
-				cursor: req.pagination.cursor,
 				skip: req.pagination.skip,
 				take: req.pagination.take,
 			});
