@@ -6,7 +6,23 @@ import APIError from '../services/APIError.service.js';
 const walksController = {
 	getAll: async (req, res, next) => {
 		try {
-			const walks = await prismaClient.walk.findMany();
+			let includeList;
+			if (req.include) {
+				if (req.include.includes('user')) {
+					includeList = { ...includeList, user: true };
+				}
+
+				if (req.include.includes('animal')) {
+					includeList = { ...includeList, animal: true };
+				}
+			}
+			const walks = await prismaClient.walk.findMany({
+				where: req.filters,
+				include: includeList,
+				orderBy: req.sort,
+				skip: req.pagination.skip,
+				take: req.pagination.take,
+			});
 			res.json(walks);
 		} catch (error) {
 			next(
