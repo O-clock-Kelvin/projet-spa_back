@@ -7,7 +7,7 @@ const walksController = {
 	getAll: async (req, res, next) => {
 		try {
 			const walks = await prismaClient.walk.findMany();
-			res.json(walks || []);
+			res.json(walks);
 		} catch (error) {
 			next(
 				new APIError({

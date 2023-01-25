@@ -32,7 +32,7 @@ const animalsController = {
 				skip: req.pagination.skip,
 				take: req.pagination.take,
 			});
-			res.json(animals || []);
+			res.json(animals);
 		} catch (error) {
 			next(
 				new APIError({

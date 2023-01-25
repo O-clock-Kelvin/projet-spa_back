@@ -90,8 +90,16 @@ const filters = (schema) => (req, res, next) => {
 	 * => http://localhost:3000/animals?include=tags
 	 */
 	if (parsedQuery.include) {
-		const includeParams = parsedQuery.include.replaceAll(' ', ''); // on retire tous les espaces du parametre include
-		req.include = includeParams; // on passe les relations à include dans la requête
+		if (Array.isArray(parsedQuery.include)) {
+			const includeList = [];
+			parsedQuery.include.forEach((includedRelation) => {
+				includeList.push(includedRelation.replaceAll(' ', '')); // on retire tous les espaces du parametre include
+			});
+			req.include = includeList;
+		} else {
+			const includeParams = parsedQuery.include.replaceAll(' ', ''); // on retire tous les espaces du parametre include
+			req.include = [includeParams]; // on passe les relations à include dans la requête
+		}
 	}
 
 	/**

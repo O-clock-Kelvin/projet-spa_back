@@ -29,7 +29,7 @@ const usersController = {
 				skip: req.pagination.skip,
 				take: req.pagination.take,
 			});
-			res.json(users || []);
+			res.json(users);
 		} catch (error) {
 			next(
 				new APIError({
