@@ -5,6 +5,7 @@ import animalsController from '../controllers/animal.controller.js';
 import validate from '../middlewares/validation.middleware.js';
 import animalsValidation from '../validations/animals.validation.js';
 import commonValidation from '../validations/common.validation.js';
+import filters from '../middlewares/filters.middleware.js';
 
 const animalRouter = express.Router();
 
@@ -18,7 +19,11 @@ const animalRouter = express.Router();
  *
  * => http://localhost:3001/v1/animals?volunteer_experience=BEGINNER&specie=CAT
  */
-animalRouter.get('/', animalsController.getAll);
+animalRouter.get(
+	'/',
+	filters(animalsValidation.queryFilters),
+	animalsController.getAll
+);
 
 /**
  * Récupère l'animal sélectionné

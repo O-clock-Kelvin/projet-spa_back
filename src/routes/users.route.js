@@ -2,6 +2,7 @@
 
 import express from 'express';
 import usersController from '../controllers/users.controller.js';
+import filters from '../middlewares/filters.middleware.js';
 import validate from '../middlewares/validation.middleware.js';
 import commonValidation from '../validations/common.validation.js';
 import userValidation from '../validations/user.validation.js';
@@ -16,7 +17,11 @@ const userRouter = express.Router();
  * Récupère toutes les données utilisateurs
  */
 
-userRouter.get('/', usersController.getAllUsers);
+userRouter.get(
+	'/',
+	filters(userValidation.queryFilters),
+	usersController.getAllUsers
+);
 
 userRouter.get(
 	'/:id',

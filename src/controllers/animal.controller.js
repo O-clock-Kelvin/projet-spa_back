@@ -8,8 +8,31 @@ const animalsController = {
 	 * Méthode pour récupérer tous les animaux en base de donnée
 	 */
 	getAll: async (req, res, next) => {
+		/**
+		 * Ajout des tags en include si demandés
+		 */
+		let includeTags;
+		if (req.include) {
+			if (req.include.includes('tags')) {
+				includeTags = {
+					tags: {
+						include: {
+							tag: true,
+						},
+					},
+				};
+			}
+		}
+
 		try {
-			const animals = await prismaClient.animal.findMany();
+			const animals = await prismaClient.animal.findMany({
+				where: req.filters,
+				include: includeTags,
+				orderBy: req.sort,
+				cursor: req.pagination.cursor,
+				skip: req.pagination.skip,
+				take: req.pagination.take,
+			});
 			res.json(animals || []);
 		} catch (error) {
 			next(
