@@ -26,6 +26,11 @@ animalRouter.get(
 );
 
 /**
+ * Route spécialisée - récupérer la liste des chiens (ou animaux) à sortir en priorité
+ */
+
+animalRouter.get('/towalk', animalsController.toWalk);
+/**
  * Récupère l'animal sélectionné
  */
 animalRouter.get(
