@@ -22,6 +22,8 @@ const animalsValidation = {
 		],
 	}),
 
+	
+
 	create: Joi.object({
 		species: Joi.string().uppercase().valid('CAT', 'DOG', 'OTHER').required(),
 		name: Joi.string().required(),

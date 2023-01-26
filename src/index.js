@@ -6,11 +6,12 @@ import cors from 'cors';
 import v1Router from './routes/router.js';
 // import errorHandler from './services/errorHandler.js';
 import errorMiddleware from './middlewares/error.middleware.js';
+import swaggerDocumentation from './swagger.js';
 
 // on charge les variables d'environnement
 dotenv.config();
 const app = express();
-
+swaggerDocumentation(app);
 app.use(express.json());
 
 app.use(cors());
@@ -25,6 +26,3 @@ app.use('/v1', v1Router);
 app.use(errorMiddleware.notFound);
 // Pour gérer les erreurs, express ajoute automatiquement un paramètre err dans le middleware
 app.use(errorMiddleware.handleError);
-
-
-// app.use(errorHandler.status_404);

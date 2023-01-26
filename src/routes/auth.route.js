@@ -10,6 +10,7 @@ const authRouter = express.Router();
 /**
  * Router qui gère les fonctions de connexion
  */
+
 authRouter.post(
 	'/login',
 	validate(authValidation.loginBody, 'body'),
