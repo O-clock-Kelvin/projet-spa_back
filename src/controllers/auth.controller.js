@@ -35,12 +35,12 @@ const authController = {
 					});
 					// on retourne un JWT signé pour vérifier sa validité
 					res.json({ token: signedJwt });
+				} else {
+					res.status(401).json({ message: 'INVALID_PASSWORD' });
 				}
-
-				res.status(401).json({ message: 'INVALID_PASSWORD' });
+			} else {
+				res.status(401).json({ message: 'INVALID_USER' });
 			}
-
-			res.status(401).json({ message: 'INVALID_USER' });
 		} catch (error) {
 			next(
 				new APIError({
