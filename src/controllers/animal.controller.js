@@ -138,6 +138,30 @@ const animalsController = {
 			);
 		}
 	},
+
+	/**
+	 * Retourne la liste des animaux (sous entendu les chiens, à l'heure actuelle) à balader en priorité
+	 */
+	toWalk: async (req, res, next) => {
+		try {
+			const animalsToWalk = await prismaClient.AnimalsToWalk.findMany({
+				where: {
+					species: 'DOG',
+				},
+				skip: Number(req.query.skip) || 0,
+				take: Number(req.query.take) || undefined,
+				// le 'orderBy' n'est pas nécessaire, la vue SQL s'en charge a notre place
+			});
+
+			res.json(animalsToWalk);
+		} catch (error) {
+			next(
+				new APIError({
+					error,
+				})
+			);
+		}
+	},
 };
 
 export default animalsController;
