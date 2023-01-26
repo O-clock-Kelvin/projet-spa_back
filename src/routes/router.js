@@ -10,7 +10,6 @@ import walkRouter from './walks.route.js';
 const v1Router = express.Router();
 
 v1Router.use('/animals', animalRouter);
-
 v1Router.use('/auth', authRouter);
 v1Router.use('/users', userRouter);
 v1Router.use('/boxes', boxRouter);
