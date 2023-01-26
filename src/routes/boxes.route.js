@@ -23,6 +23,8 @@ boxRouter.get(
 	boxesController.getAll
 );
 
+boxRouter.get('/tovisit', boxesController.toVisit);
+
 /* je veux connaitre les animaux d'une box
  */
 // router.get('/boxes/:id/animals');
