@@ -4,6 +4,8 @@ import express from 'express';
 import walksController from '../controllers/walks.controller.js';
 import validate from '../middlewares/validation.middleware.js';
 import commonValidation from '../validations/common.validation.js';
+import filters from '../middlewares/filters.middleware.js';
+import walksValidation from '../validations/walks.validation.js';
 
 const walkRouter = express.Router();
 
@@ -15,7 +17,11 @@ const walkRouter = express.Router();
  * Récupère la liste de toutes les balades
  * => on pourra ajouter un middleware de filtres
  */
-walkRouter.get('/', walksController.getAll);
+walkRouter.get(
+	'/',
+	filters(walksValidation.getFilters),
+	walksController.getAll
+);
 
 /**
  * Récupère les détails d'une balade
@@ -28,7 +34,11 @@ walkRouter.get(
 
 /* je veux créer une nouvelle balade
  */
-walkRouter.post('/', walksController.create);
+walkRouter.post(
+	'/',
+	validate(walksValidation.create, 'body'),
+ 	walksController.create
+	);
 
 /**
  * Je veux mettre à jour une balade
@@ -36,6 +46,7 @@ walkRouter.post('/', walksController.create);
 walkRouter.patch(
 	'/:id',
 	validate(commonValidation.idParams, 'params'),
+	validate(walksValidation.update, 'body'),
 	walksController.update
 );
 

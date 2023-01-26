@@ -3,9 +3,29 @@
 import Joi from 'joi';
 
 const animalsValidation = {
+	queryFilters: Joi.object({
+		id: [
+			Joi.number().integer(),
+			Joi.object().pattern(/^/, Joi.number().integer()),
+		],
+		species: Joi.string().uppercase().valid('CAT', 'DOG', 'OTHER'),
+		name: [Joi.string(), Joi.object().pattern(/^/, Joi.string())],
+		gender: Joi.string().uppercase().valid('MALE', 'FEMALE'),
+		size: Joi.string().uppercase().valid('SMALL', 'MEDIUM', 'BIG'),
+		age: Joi.object().pattern(/^/, Joi.date()),
+		volunteer_experience: Joi.string()
+			.uppercase()
+			.valid('BEGINNER', 'MEDIUM', 'EXPERT'),
+		box_id: [
+			Joi.number().integer(),
+			Joi.object().pattern(/^/, Joi.number().integer()),
+		],
+	}),
+
 	create: Joi.object({
 		species: Joi.string().uppercase().valid('CAT', 'DOG', 'OTHER').required(),
 		name: Joi.string().required(),
+		bio: Joi.string(),
 		url_image: Joi.string().uri(),
 		gender: Joi.string().uppercase().valid('MALE', 'FEMALE').required(),
 		size: Joi.string().uppercase().valid('SMALL', 'MEDIUM', 'BIG').required(),
@@ -19,6 +39,7 @@ const animalsValidation = {
 	update: Joi.object({
 		species: Joi.string().uppercase().valid('CAT', 'DOG', 'OTHER'),
 		name: Joi.string(),
+		bio: Joi.string(),
 		url_image: Joi.string().uri(),
 		gender: Joi.string().uppercase().valid('MALE', 'FEMALE'),
 		size: Joi.string().uppercase().valid('SMALL', 'MEDIUM', 'BIG'),

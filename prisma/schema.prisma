@@ -3,6 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["views"]
 }
 
 datasource db {
@@ -41,6 +42,7 @@ model Animal{
   species String
   name String
   url_image String?
+  bio String?
   gender String
   size String
   volunteer_experience String @default("BEGINNER")
@@ -91,4 +93,26 @@ model Animal_has_tag {
 
   // on crée un index composé, qui sera unique car les index des animaux et des tags sont eux aussi uniques
   @@id([animal_id, tag_id])
+}
+
+view AnimalsToWalk {
+  id    Int    @id
+  species String
+  name String
+  url_image String?
+  bio String?
+  gender String
+  size String
+  volunteer_experience String @default("BEGINNER")
+  box_id Int
+  age DateTime @db.Timestamptz() 
+  last_walk DateTime? @db.Timestamptz()
+}
+
+view BoxesToVisit{
+  id            Int    @id() 
+  type          String 
+  number        String
+  nbr_of_places Int   
+  last_visit DateTime ? @db.Timestamptz()
 }

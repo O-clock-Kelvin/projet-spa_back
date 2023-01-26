@@ -2,6 +2,7 @@
 
 import prismaClient from '../prisma.js';
 import authService from '../services/auth.service.js';
+import APIError from '../services/APIError.service.js';
 
 const authController = {
 	/**
@@ -10,7 +11,7 @@ const authController = {
 	 * @param {string} password
 	 * @returns {Promise<string>} signed JWT
 	 */
-	login: async (req, res) => {
+	login: async (req, res, next) => {
 		const { email, password } = req.body;
 		try {
 			const user = await prismaClient.user.findUnique({
@@ -35,15 +36,17 @@ const authController = {
 					// on retourne un JWT signé pour vérifier sa validité
 					res.json({ token: signedJwt });
 				}
-				// si le mot de passe n'est pas valide
-				res.status(401).json();
+
+				res.status(401).json({ message: 'INVALID_PASSWORD' });
 			}
-			// si l'email n'est associé à aucun compte
-			res.status(401).json();
+
+			res.status(401).json({ message: 'INVALID_USER' });
 		} catch (error) {
-			/** @todo Error handling */
-			console.log(error);
-			throw new Error('Error');
+			next(
+				new APIError({
+					error,
+				})
+			);
 		}
 	},
 };

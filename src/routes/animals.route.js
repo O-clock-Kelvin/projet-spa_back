@@ -5,6 +5,7 @@ import animalsController from '../controllers/animal.controller.js';
 import validate from '../middlewares/validation.middleware.js';
 import animalsValidation from '../validations/animals.validation.js';
 import commonValidation from '../validations/common.validation.js';
+import filters from '../middlewares/filters.middleware.js';
 
 const animalRouter = express.Router();
 
@@ -18,8 +19,17 @@ const animalRouter = express.Router();
  *
  * => http://localhost:3001/v1/animals?volunteer_experience=BEGINNER&specie=CAT
  */
-animalRouter.get('/', animalsController.getAll);
+animalRouter.get(
+	'/',
+	filters(animalsValidation.queryFilters),
+	animalsController.getAll
+);
 
+/**
+ * Route spécialisée - récupérer la liste des chiens (ou animaux) à sortir en priorité
+ */
+
+animalRouter.get('/towalk', animalsController.toWalk);
 /**
  * Récupère l'animal sélectionné
  */
@@ -27,6 +37,15 @@ animalRouter.get(
 	'/:id',
 	validate(commonValidation.idParams, 'params'),
 	animalsController.getOne
+);
+
+/**
+ * Récupère l'historique des balades d'un animal en particulié
+ */
+ animalRouter.get(
+	'/:id/walks',
+	validate(commonValidation.idParams, 'params'),
+	animalsController.getWalksOfAnimal
 );
 
 /* je veux créer un nouvel animal

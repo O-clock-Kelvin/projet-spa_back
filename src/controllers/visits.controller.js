@@ -1,40 +1,67 @@
 /** @format */
 
 import prismaClient from '../prisma.js';
+import APIError from '../services/APIError.service.js';
 
 const visitsController = {
 	// Méthode pour récupérer la liste des visites
-	getAll: async (req, res) => {
+	getAll: async (req, res, next) => {
 		try {
-			const visits = await prismaClient.visit.findMany();
+			let includeList;
+			if (req.include) {
+				if (req.include.includes('user')) {
+					includeList = { ...includeList, user: true };
+			
+				}
+
+				if (req.include.includes('box')) {
+					includeList = { ...includeList, box: true };
+				}
+			
+			}
+
+			const visits = await prismaClient.visit.findMany({
+				where: req.filters,
+				orderBy: req.sort,
+				include: includeList,
+				skip: req.pagination.skip,
+				take: req.pagination.take,
+			});
 			res.json(visits);
 		} catch (error) {
-			/**
-			 * @todo error handling
-			 */
-			throw new Error(error);
+			next(
+				new APIError({
+					error,
+				})
+			);
 		}
 	},
 
 	// Méthode pour récupérer la liste des visites d'une boxe en particulier
-	getOne: async (req, res) => {
+	getOne: async (req, res, next) => {
 		try {
 			const visit = await prismaClient.visit.findUnique({
 				where: {
 					id: Number(req.params.id), // on converti l'id en number car il arrive depuis req.params en string
 				},
 			});
-			res.json(visit);
+
+			if (visit) {
+				res.json(visit);
+			} else {
+				res.status(404).json([]);
+			}
 		} catch (error) {
-			/**
-			 * @todo error handling
-			 */
-			throw new Error(error);
+			next(
+				new APIError({
+					error,
+				})
+			);
 		}
 	},
 
 	// Méthode pour créer une nouvelle visite
-	create: async (req, res) => {
+	create: async (req, res, next) => {
 		try {
 			const createdVisit = await prismaClient.visit.create({
 				data: {
@@ -48,17 +75,18 @@ const visitsController = {
 			// on renvoie les données créées
 			res.status(201).json(createdVisit);
 		} catch (error) {
-			/**
-			 * @todo error handling
-			 */
-			throw new Error(error);
+			next(
+				new APIError({
+					error,
+				})
+			);
 		}
 	},
 
 	/**
 	 * Méthode pour mettre a jour une visite
 	 */
-	update: async (req, res) => {
+	update: async (req, res, next) => {
 		try {
 			const updatedVisit = await prismaClient.visit.update({
 				where: {
@@ -72,14 +100,15 @@ const visitsController = {
 			// on retourne la visite mise à jour
 			res.json(updatedVisit);
 		} catch (error) {
-			/**
-			 * @todo error handling
-			 */
-			throw new Error(error);
+			next(
+				new APIError({
+					error,
+				})
+			);
 		}
 	},
 
-	delete: async (req, res) => {
+	delete: async (req, res, next) => {
 		try {
 			// on delete l'utilisateur par son id
 			await prismaClient.visit.delete({
@@ -91,10 +120,11 @@ const visitsController = {
 			// on renvoie un status 204 - no content pour signaler au front que l'utilisateur a bien été supprimé.
 			res.status(204).json([]);
 		} catch (error) {
-			/**
-			 * @todo error handling
-			 */
-			throw new Error(error);
+			next(
+				new APIError({
+					error,
+				})
+			);
 		}
 	},
 };
