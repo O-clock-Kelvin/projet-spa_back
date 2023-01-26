@@ -42,7 +42,7 @@ const animalsController = {
 		}
 	},
 	/**
-	 * Méthode pour récupérer un animal en particuliers
+	 * Méthode pour récupérer un animal en particulier
 	 */
 	getOne: async (req, res, next) => {
 		const animalId = req.params.id;
@@ -67,6 +67,34 @@ const animalsController = {
 			);
 		}
 	},
+	/**
+	 * Méthode pour récupérer l'historique des balades d'un animal en particulier
+	 */
+	getWalksOfAnimal: async(req,res,next) => {
+		const animalId = req.params.id;
+		
+		const getWalksOfAnimal = await prismaClient.animal.findUnique({
+			include : {				
+				walks : {
+					select : {
+						date : true,
+						comment : true,
+						feeling : true
+					},
+					orderBy: {
+						date : 'desc'
+					}
+				}						
+			},
+			where : {
+				id : animalId
+			}
+			
+		});
+		res.json(getWalksOfAnimal);
+	},
+
+
 	/**
 	 * Méthode pour créer un nouvel animal
 	 */

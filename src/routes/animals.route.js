@@ -34,6 +34,15 @@ animalRouter.get(
 	animalsController.getOne
 );
 
+/**
+ * Récupère l'historique des balades d'un animal en particulié
+ */
+ animalRouter.get(
+	'/:id/walks',
+	validate(commonValidation.idParams, 'params'),
+	animalsController.getWalksOfAnimal
+);
+
 /* je veux créer un nouvel animal
  */
 animalRouter.post(
