@@ -108,3 +108,11 @@ view AnimalsToWalk {
   age DateTime @db.Timestamptz() 
   last_walk DateTime? @db.Timestamptz()
 }
+
+view BoxesToVisit{
+  id            Int    @id() 
+  type          String 
+  number        String
+  nbr_of_places Int   
+  last_visit DateTime ? @db.Timestamptz()
+}

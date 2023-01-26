@@ -5,7 +5,6 @@ import APIError from '../services/APIError.service.js';
 
 const boxesController = {
 	getAll: async (req, res, next) => {
-		
 		try {
 			const boxes = await prismaClient.box.findMany({
 				where: req.filters,
@@ -110,6 +109,25 @@ const boxesController = {
 				},
 			});
 			res.status(204).json([]);
+		} catch (error) {
+			next(
+				new APIError({
+					error,
+				})
+			);
+		}
+	},
+
+	toVisit: async (req, res, next) => {
+		try {
+			const boxesToVisit = await prismaClient.boxesToVisit.findMany({
+				where: {
+					type: 'CAT',
+				},
+				skip: Number(req.query.skip) || 0,
+				take: Number(req.query.take) || undefined,
+			});
+			res.json(boxesToVisit);
 		} catch (error) {
 			next(
 				new APIError({
