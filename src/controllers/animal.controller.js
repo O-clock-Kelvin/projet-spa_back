@@ -91,7 +91,11 @@ const animalsController = {
 				}
 				
 			});
-			res.json(getWalksOfAnimal);
+			if(!getWalksOfAnimal){
+				res.status(404).json([]);
+			}else{
+				res.json(getWalksOfAnimal);
+			}
 		
 		}catch(error){
 			next(

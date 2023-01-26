@@ -25,10 +25,8 @@ boxRouter.get(
 
 boxRouter.get('/tovisit', boxesController.toVisit);
 
-/* je veux connaitre les animaux d'une box
+/* je veux connaitre les animaux d'un box
  */
-// router.get('/boxes/:id/animals');
-
 boxRouter.get(
 	'/:id/animals',
 	validate(commonValidation.idParams, 'params'),
@@ -36,7 +34,14 @@ boxRouter.get(
 );
 
 /**
- * Récupère une box
+ * Récupère l'historique des visites d'un box unique
+*/
+boxRouter.get('/:id/visits',
+	validate(commonValidation.idParams, 'params'),
+	boxesController.getVisitsOfOneBox);
+
+/**
+ * Récupère un box
  */
 boxRouter.get(
 	'/:id',

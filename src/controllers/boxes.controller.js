@@ -1,5 +1,6 @@
 /** @format */
 
+
 import prismaClient from '../prisma.js';
 import APIError from '../services/APIError.service.js';
 
@@ -61,6 +62,40 @@ const boxesController = {
 				})
 			);
 		}
+	},
+	getVisitsOfOneBox: async(req, res, next) => {
+		try {
+			const boxId = req.params.id;	
+			const getVisits = await prismaClient.box.findUnique({
+				include : {				
+					visits : {
+						select : {
+							date : true,
+							comment : true
+						},
+						orderBy: {
+							date : 'desc'
+						}
+					}						
+				},
+				where : {
+					id : Number(boxId)
+				}
+			});
+			if(!getVisits){
+				res.status(404).json([]);
+			}else{
+				res.json(getVisits);
+			}
+			
+		} catch (error) {
+			next(
+				new APIError({
+					error,
+				})
+			);
+		}
+
 	},
 
 	create: async (req, res, next) => {
