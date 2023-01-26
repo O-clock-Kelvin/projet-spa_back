@@ -34,7 +34,11 @@ walkRouter.get(
 
 /* je veux créer une nouvelle balade
  */
-walkRouter.post('/', walksController.create);
+walkRouter.post(
+	'/',
+	validate(walksValidation.create, 'body'),
+ 	walksController.create
+	);
 
 /**
  * Je veux mettre à jour une balade
@@ -42,6 +46,7 @@ walkRouter.post('/', walksController.create);
 walkRouter.patch(
 	'/:id',
 	validate(commonValidation.idParams, 'params'),
+	validate(walksValidation.update, 'body'),
 	walksController.update
 );
 
