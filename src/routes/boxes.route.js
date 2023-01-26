@@ -5,6 +5,7 @@ import boxesController from '../controllers/boxes.controller.js';
 import validate from '../middlewares/validation.middleware.js';
 import boxesValidation from '../validations/boxes.validation.js';
 import commonValidation from '../validations/common.validation.js';
+import filters from '../middlewares/filters.middleware.js';
 /**
  * Router qui gère l'ensemble des routes "boxes"
  */
@@ -16,7 +17,11 @@ const boxRouter = express.Router();
  * => on pourra appliquer un middleware de filtre
  */
 
-boxRouter.get('/', boxesController.getAll);
+boxRouter.get(
+	'/',
+	filters(boxesValidation.queryFilters),
+	boxesController.getAll
+);
 
 /* je veux connaitre les animaux d'une box
  */

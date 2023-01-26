@@ -5,6 +5,7 @@ import visitsController from '../controllers/visits.controller.js';
 import validate from '../middlewares/validation.middleware.js';
 import commonValidation from '../validations/common.validation.js';
 import visitsValidation from '../validations/visits.validation.js';
+import filters from '../middlewares/filters.middleware.js';
 
 const visitRouter = express.Router();
 
@@ -16,7 +17,11 @@ const visitRouter = express.Router();
  * Récupère la liste de toutes les visites
  * => on pourra appliquer des filtres plus tar
  */
-visitRouter.get('/', visitsController.getAll);
+visitRouter.get(
+	'/',
+	filters(visitsValidation.getFilters),
+	visitsController.getAll
+);
 
 /**
  * Je veux créer une nouvelle visite

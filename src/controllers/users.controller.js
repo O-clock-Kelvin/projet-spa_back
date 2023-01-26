@@ -10,7 +10,6 @@ const usersController = {
 	 */
 	getAllUsers: async (req, res, next) => {
 		try {
-
 			const users = await prismaClient.user.findMany({
 				// la fonction d'exclusion de champs n'existe pas avec prisma à l'heure actuelle
 				// une issue est en cours pour ajouter cette fonction: https://github.com/prisma/prisma/issues/5042
@@ -25,8 +24,12 @@ const usersController = {
 					phone_number: true,
 					url_image: true,
 				},
+				where: req.filters,
+				orderBy: req.sort,
+				skip: req.pagination.skip,
+				take: req.pagination.take,
 			});
-			res.json(users || []);
+			res.json(users);
 		} catch (error) {
 			next(
 				new APIError({

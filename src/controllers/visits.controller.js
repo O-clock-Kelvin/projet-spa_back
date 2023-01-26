@@ -7,8 +7,27 @@ const visitsController = {
 	// Méthode pour récupérer la liste des visites
 	getAll: async (req, res, next) => {
 		try {
-			const visits = await prismaClient.visit.findMany();
-			res.json(visits || []);
+			let includeList;
+			if (req.include) {
+				if (req.include.includes('user')) {
+					includeList = { ...includeList, user: true };
+			
+				}
+
+				if (req.include.includes('box')) {
+					includeList = { ...includeList, box: true };
+				}
+			
+			}
+
+			const visits = await prismaClient.visit.findMany({
+				where: req.filters,
+				orderBy: req.sort,
+				include: includeList,
+				skip: req.pagination.skip,
+				take: req.pagination.take,
+			});
+			res.json(visits);
 		} catch (error) {
 			next(
 				new APIError({

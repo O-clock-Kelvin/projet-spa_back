@@ -26,7 +26,8 @@
 		"nodemailer-express-handlebars": "^6.0.0",
 		"nodemon": "^2.0.20",
 		"prettier": "^2.8.3",
-		"prisma": "^4.9.0"
+		"prisma": "^4.9.0",
+		"qs": "^6.11.0"
 	},
 	"devDependencies": {
 		"eslint-config-airbnb-base": "^15.0.0",
