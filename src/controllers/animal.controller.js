@@ -2,12 +2,21 @@
 
 import prismaClient from '../prisma.js';
 import APIError from '../services/APIError.service.js';
+import filtersService from '../services/filters.service.js';
 
 const animalsController = {
 	/**
 	 * Méthode pour récupérer tous les animaux en base de donnée
 	 */
 	getAll: async (req, res, next) => {
+		let whereTagsRequest;
+		if (req.filters.tagsList) {
+			whereTagsRequest = filtersService.filterByAnimalTags(
+				req.filters.tagsList
+			);
+			delete req.filters.tagsList;
+		}
+
 		/**
 		 * Ajout des tags en include si demandés
 		 */
@@ -26,8 +35,13 @@ const animalsController = {
 
 		try {
 			const animals = await prismaClient.animal.findMany({
-				where: req.filters,
+				// include: includeTags,
+				where: {
+					...req.filters,
+					...whereTagsRequest,
+				},
 				include: includeTags,
+
 				orderBy: req.sort,
 				skip: req.pagination.skip,
 				take: req.pagination.take,
@@ -70,30 +84,28 @@ const animalsController = {
 	/**
 	 * Méthode pour récupérer l'historique des balades d'un animal en particulier
 	 */
-	getWalksOfAnimal: async(req,res,next) => {
+	getWalksOfAnimal: async (req, res, next) => {
 		const animalId = req.params.id;
-		try{
+		try {
 			const getWalksOfAnimal = await prismaClient.animal.findUnique({
-				include : {				
-					walks : {
-						select : {
-							date : true,
-							comment : true,
-							feeling : true
+				include: {
+					walks: {
+						select: {
+							date: true,
+							comment: true,
+							feeling: true,
 						},
 						orderBy: {
-							date : 'desc'
-						}
-					}						
+							date: 'desc',
+						},
+					},
 				},
-				where : {
-					id : animalId
-				}
-				
+				where: {
+					id: animalId,
+				},
 			});
 			res.json(getWalksOfAnimal);
-		
-		}catch(error){
+		} catch (error) {
 			next(
 				new APIError({
 					error,
@@ -105,7 +117,6 @@ const animalsController = {
 	 * Méthode pour créer un nouvel animal
 	 */
 	create: async (req, res, next) => {
-
 		try {
 			const animal = req.body;
 			const createAnimal = await prismaClient.animal.create({

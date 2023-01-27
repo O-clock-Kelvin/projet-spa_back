@@ -13,6 +13,10 @@ const animalsValidation = {
 		gender: Joi.string().uppercase().valid('MALE', 'FEMALE'),
 		size: Joi.string().uppercase().valid('SMALL', 'MEDIUM', 'BIG'),
 		age: Joi.object().pattern(/^/, Joi.date()),
+		tagsList: [
+			Joi.number().integer().min(1),
+			Joi.array().items(Joi.number().integer().min(1)),
+		],
 		volunteer_experience: Joi.string()
 			.uppercase()
 			.valid('BEGINNER', 'MEDIUM', 'EXPERT'),
