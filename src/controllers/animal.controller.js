@@ -104,8 +104,13 @@ const animalsController = {
 					id: animalId,
 				},
 			});
-			res.json(getWalksOfAnimal);
-		} catch (error) {
+
+			if(!getWalksOfAnimal){
+				res.status(404).json([]);
+			}else{
+				res.json(getWalksOfAnimal);
+			}
+		}catch(error){
 			next(
 				new APIError({
 					error,
