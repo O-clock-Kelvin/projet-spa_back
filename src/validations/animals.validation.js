@@ -12,7 +12,11 @@ const animalsValidation = {
 		name: [Joi.string(), Joi.object().pattern(/^/, Joi.string())],
 		gender: Joi.string().uppercase().valid('MALE', 'FEMALE'),
 		size: Joi.string().uppercase().valid('SMALL', 'MEDIUM', 'BIG'),
-		age: Joi.object().pattern(/^/, Joi.date()),
+		age: [
+			Joi.date().iso().options({ convert: true }),
+			Joi.object().pattern(/^/, Joi.date().iso().options({ convert: true })),
+		],
+
 		tagsList: [
 			Joi.number().integer().min(1),
 			Joi.array().items(Joi.number().integer().min(1)),
