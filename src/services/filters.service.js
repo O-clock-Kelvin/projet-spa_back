@@ -4,8 +4,6 @@ const filtersService = {
 	filterByAnimalTags: (tagsList) => {
 		const whereTags = [];
 		if (tagsList) {
-			
-
 			if (tagsList != null) {
 				if (Array.isArray(tagsList)) {
 					tagsList.forEach((tag) => {

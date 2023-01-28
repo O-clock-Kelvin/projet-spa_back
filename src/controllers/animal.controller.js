@@ -1,5 +1,6 @@
 /** @format */
 
+import qs from 'qs';
 import prismaClient from '../prisma.js';
 import APIError from '../services/APIError.service.js';
 import filtersService from '../services/filters.service.js';
@@ -16,30 +17,6 @@ const animalsController = {
 			);
 			delete req.filters.tagsList;
 		}
-
-		/**
-		 * Ajout des tags en include si demandés
-		 */
-		// let includeList;
-		// let includeTags;
-		// let includeWalks;
-		// if (req.include) {
-		// 	if (req.include.includes('tags')) {
-		// 		includeTags = {
-		// 			tags: {
-		// 				include: {
-		// 					tag: true,
-		// 				},
-		// 			},
-		// 		};
-		// 	}
-
-		// 	if (req.include.includes('walks')) {
-		// 		includeWalks = {
-		// 			walks: true,
-		// 		};
-		// 	}
-		// }
 
 		try {
 			const animals = await prismaClient.animal.findMany({
@@ -86,11 +63,24 @@ const animalsController = {
 	 */
 	getOne: async (req, res, next) => {
 		const animalId = req.params.id;
+
+		const queryParams = qs.parse(req.query, { comma: true });
+		console.log(queryParams);
 		try {
 			// si l'animal existe, on soumet la requete en bdd//
 			const getAnimal = await prismaClient.animal.findUnique({
 				where: {
 					id: Number(animalId),
+				},
+				include: {
+					walks: !!queryParams.include?.includes('walks'),
+					tags: queryParams.include?.includes('tags')
+						? {
+								include: {
+									tag: true,
+								},
+						  }
+						: false,
 				},
 			});
 			// si l'animal n'est pas trouvé en bdd on passe au middleware handlerError
