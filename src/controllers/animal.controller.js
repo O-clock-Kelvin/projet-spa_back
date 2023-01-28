@@ -20,18 +20,26 @@ const animalsController = {
 		/**
 		 * Ajout des tags en include si demandés
 		 */
-		let includeTags;
-		if (req.include) {
-			if (req.include.includes('tags')) {
-				includeTags = {
-					tags: {
-						include: {
-							tag: true,
-						},
-					},
-				};
-			}
-		}
+		// let includeList;
+		// let includeTags;
+		// let includeWalks;
+		// if (req.include) {
+		// 	if (req.include.includes('tags')) {
+		// 		includeTags = {
+		// 			tags: {
+		// 				include: {
+		// 					tag: true,
+		// 				},
+		// 			},
+		// 		};
+		// 	}
+
+		// 	if (req.include.includes('walks')) {
+		// 		includeWalks = {
+		// 			walks: true,
+		// 		};
+		// 	}
+		// }
 
 		try {
 			const animals = await prismaClient.animal.findMany({
@@ -40,8 +48,26 @@ const animalsController = {
 					...req.filters,
 					...whereTagsRequest,
 				},
-				include: includeTags,
+				// include: includeTags,
+				include: {
+					/**
+					 * 1) la notation (!!) permet de "caster" une expression vers un boolean (true/false)
+					 * => https://brianflove.com/2014-09-02/whats-the-double-exclamation-mark-for-in-javascript/
+					 *
+					 * 2) la notation "req.include?.includes" permet de vérifier que l'objet "req.include" existe bien. Si il existe, la méthode "includes" s'exécute, sinon la variable
+					 * est définie comme undefined
+					 * => https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Optional_chaining
+					 */
 
+					walks: !!req.include?.includes('walks'),
+					tags: req.include?.includes('tags')
+						? {
+								include: {
+									tag: true,
+								},
+						  }
+						: false,
+				},
 				orderBy: req.sort,
 				skip: req.pagination.skip,
 				take: req.pagination.take,
@@ -69,7 +95,7 @@ const animalsController = {
 			});
 			// si l'animal n'est pas trouvé en bdd on passe au middleware handlerError
 			if (!getAnimal) {
-				res.status(404).json([]);
+				res.status(404).json({ message: 'NOT_FOUND' });
 			} else {
 				res.json(getAnimal);
 			}
@@ -105,12 +131,12 @@ const animalsController = {
 				},
 			});
 
-			if(!getWalksOfAnimal){
-				res.status(404).json([]);
-			}else{
+			if (!getWalksOfAnimal) {
+				res.status(404).json({ message: 'NOT_FOUND' });
+			} else {
 				res.json(getWalksOfAnimal);
 			}
-		}catch(error){
+		} catch (error) {
 			next(
 				new APIError({
 					error,
