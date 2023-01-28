@@ -35,7 +35,7 @@ const boxesController = {
 			if (box) {
 				res.json(box);
 			} else {
-				res.status(404).json([]);
+				res.status(404).json({ message: 'NOT_FOUND' });
 			}
 		} catch (error) {
 			next(
@@ -83,7 +83,7 @@ const boxesController = {
 				}
 			});
 			if(!getVisits){
-				res.status(404).json([]);
+				res.status(404).json({ message: 'NOT_FOUND' });
 			}else{
 				res.json(getVisits);
 			}

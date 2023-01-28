@@ -49,7 +49,7 @@ const visitsController = {
 			if (visit) {
 				res.json(visit);
 			} else {
-				res.status(404).json([]);
+				res.status(404).json({ message: 'NOT_FOUND' });
 			}
 		} catch (error) {
 			next(

@@ -64,7 +64,7 @@ const usersController = {
 			if (user) {
 				res.json(user);
 			} else {
-				res.status(404).json([]);
+				res.status(404).json({ message: 'NOT_FOUND' });
 			}
 		} catch (error) {
 			next(

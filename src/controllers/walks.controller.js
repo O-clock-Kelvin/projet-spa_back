@@ -44,7 +44,7 @@ const walksController = {
 			});
 			// si l'animal n'est pas trouvé en bdd on passe au middleware handlerError
 			if (!getWalk) {
-				res.status(404).json([]);
+				res.status(404).json({ message: 'NOT_FOUND' });
 			} else {
 				res.json(getWalk);
 			}
