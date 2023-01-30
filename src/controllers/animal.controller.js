@@ -73,7 +73,13 @@ const animalsController = {
 					id: Number(animalId),
 				},
 				include: {
-					walks: !!queryParams.include?.includes('walks'),
+					walks: queryParams.include?.includes('walks')
+						? {
+								orderBy: {
+									id: 'asc',
+								},
+						  }
+						: false,
 					tags: queryParams.include?.includes('tags')
 						? {
 								include: {
@@ -83,6 +89,7 @@ const animalsController = {
 						: false,
 				},
 			});
+
 			// si l'animal n'est pas trouvé en bdd on passe au middleware handlerError
 			if (!getAnimal) {
 				res.status(404).json({ message: 'NOT_FOUND' });
@@ -103,23 +110,31 @@ const animalsController = {
 	getWalksOfAnimal: async (req, res, next) => {
 		const animalId = req.params.id;
 		try {
-			const getWalksOfAnimal = await prismaClient.animal.findUnique({
-				include: {
-					walks: {
-						select: {
-							date: true,
-							comment: true,
-							feeling: true,
-						},
-						orderBy: {
-							date: 'desc',
-						},
-					},
-				},
+			const getWalksOfAnimal = await prismaClient.walk.findMany({
 				where: {
-					id: animalId,
+					animal_id: animalId,
+				},
+				orderBy: {
+					date: 'desc',
 				},
 			});
+			// const getWalksOfAnimal = await prismaClient.animal.findUnique({
+			// 	include: {
+			// 		walks: {
+			// 			select: {
+			// 				date: true,
+			// 				comment: true,
+			// 				feeling: true,
+			// 			},
+			// 			orderBy: {
+			// 				date: 'desc',
+			// 			},
+			// 		},
+			// 	},
+			// 	where: {
+			// 		id: animalId,
+			// 	},
+			// });
 
 			if (!getWalksOfAnimal) {
 				res.status(404).json({ message: 'NOT_FOUND' });
