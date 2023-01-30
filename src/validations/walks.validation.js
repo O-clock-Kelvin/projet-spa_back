@@ -28,7 +28,7 @@ const walksValidation = {
 		comment: Joi.string(),
 		feeling: Joi.string().uppercase().valid('BAD', 'MEDIUM', 'GOOD'),
 		date: Joi.date(),
-		endDate: Joi.date(),
+		end_date: Joi.date(),
 	}),
 };
 export default walksValidation;
