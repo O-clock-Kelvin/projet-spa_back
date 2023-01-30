@@ -109,37 +109,48 @@ const animalsController = {
 	 */
 	getWalksOfAnimal: async (req, res, next) => {
 		const animalId = req.params.id;
+		let nextCursor = null;
+		console.log(req.query);
+		const queryCursor = Number(req.query.cursor);
+		console.log('CURSOR', queryCursor);
 		try {
-			const getWalksOfAnimal = await prismaClient.walk.findMany({
+			const walks = await prismaClient.walk.findMany({
 				where: {
 					animal_id: animalId,
 				},
 				orderBy: {
 					date: 'desc',
 				},
+				cursor:
+					queryCursor !== 0
+						? {
+								id: queryCursor,
+						  }
+						: undefined,
+				skip: queryCursor !== 0 ? 1 : undefined,
+				take: queryCursor != null ? 3 : undefined,
 			});
-			// const getWalksOfAnimal = await prismaClient.animal.findUnique({
-			// 	include: {
-			// 		walks: {
-			// 			select: {
-			// 				date: true,
-			// 				comment: true,
-			// 				feeling: true,
-			// 			},
-			// 			orderBy: {
-			// 				date: 'desc',
-			// 			},
-			// 		},
-			// 	},
-			// 	where: {
-			// 		id: animalId,
-			// 	},
-			// });
 
-			if (!getWalksOfAnimal) {
+			if (walks.length > 0) {
+				nextCursor = await prismaClient.walk.findFirst({
+					where: {
+						animal_id: animalId,
+					},
+					orderBy: {
+						date: 'desc',
+					},
+					cursor: {
+						id: walks[walks.length - 1].id,
+					},
+					skip: 1,
+					take: 1,
+				});
+			}
+
+			if (!walks) {
 				res.status(404).json({ message: 'NOT_FOUND' });
 			} else {
-				res.json(getWalksOfAnimal);
+				res.json({ walks, nextCursor: nextCursor?.id || null });
 			}
 		} catch (error) {
 			next(
@@ -149,6 +160,7 @@ const animalsController = {
 			);
 		}
 	},
+
 	/**
 	 * Méthode pour créer un nouvel animal
 	 */
@@ -177,6 +189,7 @@ const animalsController = {
 			);
 		}
 	},
+
 	/**
 	 * Méthode pour mettre a jour un animal spécifique
 	 */
@@ -202,6 +215,7 @@ const animalsController = {
 			);
 		}
 	},
+
 	delete: async (req, res, next) => {
 		try {
 			const animalId = req.params.id;
