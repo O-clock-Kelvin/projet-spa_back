@@ -63,10 +63,12 @@ const userValidation = {
 		email: Joi.string().email().lowercase(),
 		password: Joi.string().min(8),
 		firstname: Joi.string(),
-		name: Joi.string(),
-		phone_number: Joi.string().regex(
-			/(?:(?:\+|00)33[\s.-]{0,3}(?:\(0\)[\s.-]{0,3})?|0)[1-9](?:(?:[\s.-]?\d{2}){4}|\d{2}(?:[\s.-]?\d{3}){2})$/m
-		),
+		name: Joi.string().allow(null),
+		phone_number: Joi.string()
+			.allow(null)
+			.regex(
+				/(?:(?:\+|00)33[\s.-]{0,3}(?:\(0\)[\s.-]{0,3})?|0)[1-9](?:(?:[\s.-]?\d{2}){4}|\d{2}(?:[\s.-]?\d{3}){2})$/m
+			),
 		admin: Joi.boolean(),
 		experience: Joi.string().uppercase().valid('BEGINNER', 'MEDIUM', 'EXPERT'),
 		url_image: Joi.string().uri(),

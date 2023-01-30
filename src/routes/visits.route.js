@@ -6,6 +6,7 @@ import validate from '../middlewares/validation.middleware.js';
 import commonValidation from '../validations/common.validation.js';
 import visitsValidation from '../validations/visits.validation.js';
 import filters from '../middlewares/filters.middleware.js';
+import authentification from '../middlewares/auth.middleware.js';
 
 const visitRouter = express.Router();
 
@@ -19,7 +20,9 @@ const visitRouter = express.Router();
  */
 visitRouter.get(
 	'/',
+	authentification,
 	filters(visitsValidation.getFilters),
+
 	visitsController.getAll
 );
 
@@ -28,6 +31,7 @@ visitRouter.get(
  */
 visitRouter.post(
 	'/',
+	authentification,
 	validate(visitsValidation.create, 'body'),
 	visitsController.create
 );
@@ -37,6 +41,7 @@ visitRouter.post(
  */
 visitRouter.get(
 	'/:id',
+	authentification,
 	validate(commonValidation.idParams, 'params'),
 	visitsController.getOne
 );
@@ -46,6 +51,7 @@ visitRouter.get(
  */
 visitRouter.patch(
 	'/:id',
+	authentification,
 	validate(commonValidation.idParams, 'params'),
 	validate(visitsValidation.update, 'body'),
 	visitsController.update
@@ -56,6 +62,7 @@ visitRouter.patch(
  */
 visitRouter.delete(
 	'/:id',
+	authentification,
 	validate(commonValidation.idParams),
 	visitsController.delete
 );

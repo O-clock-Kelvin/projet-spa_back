@@ -117,57 +117,69 @@ const boxesController = {
 	},
 
 	create: async (req, res, next) => {
-		try {
-			const createdBox = await prismaClient.box.create({
-				data: {
-					type: req.body.type.toUpperCase() || 'OTHER',
-					nbr_of_places: Number(req.body.nbr_of_places),
-					number: req.body.number,
-				},
-			});
-			res.status(201).json(createdBox);
-		} catch (error) {
-			next(
-				new APIError({
-					error,
-				})
-			);
+		if (req.user.admin === true) {
+			try {
+				const createdBox = await prismaClient.box.create({
+					data: {
+						type: req.body.type.toUpperCase() || 'OTHER',
+						nbr_of_places: Number(req.body.nbr_of_places),
+						number: req.body.number,
+					},
+				});
+				res.status(201).json(createdBox);
+			} catch (error) {
+				next(
+					new APIError({
+						error,
+					})
+				);
+			}
+		} else {
+			res.status(401).json({ message: 'INVALID_PERMISSIONS' });
 		}
 	},
 
 	update: async (req, res, next) => {
-		try {
-			const updatedBox = await prismaClient.box.update({
-				where: {
-					id: Number(req.params.id),
-				},
-				data: req.body,
-			});
+		if (req.user.admin === true) {
+			try {
+				const updatedBox = await prismaClient.box.update({
+					where: {
+						id: Number(req.params.id),
+					},
+					data: req.body,
+				});
 
-			res.json(updatedBox);
-		} catch (error) {
-			next(
-				new APIError({
-					error,
-				})
-			);
+				res.json(updatedBox);
+			} catch (error) {
+				next(
+					new APIError({
+						error,
+					})
+				);
+			}
+		} else {
+			res.status(401).json({ message: 'INVALID_PERMISSIONS' });
 		}
 	},
 
 	delete: async (req, res, next) => {
-		try {
-			await prismaClient.box.delete({
-				where: {
-					id: Number(req.params.id),
-				},
-			});
-			res.status(204).json([]);
-		} catch (error) {
-			next(
-				new APIError({
-					error,
-				})
-			);
+		if (req.user.admin === true) {
+			try {
+				await prismaClient.box.delete({
+					where: {
+						id: Number(req.params.id),
+					},
+				});
+				res.status(204).json([]);
+			} catch (error) {
+				next(
+					new APIError({
+						error,
+					})
+				);
+			}
+		} else {
+			res.status(401).json({ message: 'INVALID_PERMISSIONS' });
 		}
 	},
 

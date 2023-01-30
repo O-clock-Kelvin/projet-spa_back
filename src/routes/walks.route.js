@@ -6,6 +6,7 @@ import validate from '../middlewares/validation.middleware.js';
 import commonValidation from '../validations/common.validation.js';
 import filters from '../middlewares/filters.middleware.js';
 import walksValidation from '../validations/walks.validation.js';
+import authentification from '../middlewares/auth.middleware.js';
 
 const walkRouter = express.Router();
 
@@ -19,6 +20,7 @@ const walkRouter = express.Router();
  */
 walkRouter.get(
 	'/',
+	authentification,
 	filters(walksValidation.getFilters),
 	walksController.getAll
 );
@@ -29,6 +31,7 @@ walkRouter.get(
 walkRouter.get(
 	'/:id',
 	validate(commonValidation.idParams, 'params'),
+	authentification,
 	walksController.getOne
 );
 
@@ -36,9 +39,10 @@ walkRouter.get(
  */
 walkRouter.post(
 	'/',
+	authentification,
 	validate(walksValidation.create, 'body'),
- 	walksController.create
-	);
+	walksController.create
+);
 
 /**
  * Je veux mettre à jour une balade
@@ -46,6 +50,7 @@ walkRouter.post(
 walkRouter.patch(
 	'/:id',
 	validate(commonValidation.idParams, 'params'),
+	authentification,
 	validate(walksValidation.update, 'body'),
 	walksController.update
 );
@@ -56,6 +61,7 @@ walkRouter.patch(
 walkRouter.delete(
 	'/:id',
 	validate(commonValidation.idParams, 'params'),
+	authentification,
 	walksController.delete
 );
 

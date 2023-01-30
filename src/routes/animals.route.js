@@ -6,6 +6,7 @@ import validate from '../middlewares/validation.middleware.js';
 import animalsValidation from '../validations/animals.validation.js';
 import commonValidation from '../validations/common.validation.js';
 import filters from '../middlewares/filters.middleware.js';
+import authentification from '../middlewares/auth.middleware.js';
 
 const animalRouter = express.Router();
 
@@ -21,6 +22,7 @@ const animalRouter = express.Router();
  */
 animalRouter.get(
 	'/',
+	authentification,
 	filters(animalsValidation.queryFilters),
 	animalsController.getAll
 );
@@ -29,12 +31,13 @@ animalRouter.get(
  * Route spécialisée - récupérer la liste des chiens (ou animaux) à sortir en priorité
  */
 
-animalRouter.get('/towalk', animalsController.toWalk);
+animalRouter.get('/towalk', authentification, animalsController.toWalk);
 /**
  * Récupère l'animal sélectionné
  */
 animalRouter.get(
 	'/:id',
+	authentification,
 	validate(commonValidation.idParams, 'params'),
 	animalsController.getOne
 );
@@ -42,8 +45,9 @@ animalRouter.get(
 /**
  * Récupère l'historique des balades d'un animal en particulié
  */
- animalRouter.get(
+animalRouter.get(
 	'/:id/walks',
+	authentification,
 	validate(commonValidation.idParams, 'params'),
 	animalsController.getWalksOfAnimal
 );
@@ -52,6 +56,7 @@ animalRouter.get(
  */
 animalRouter.post(
 	'/',
+	authentification,
 	validate(animalsValidation.create, 'body'),
 	animalsController.create
 );
@@ -61,6 +66,7 @@ animalRouter.post(
 animalRouter.patch(
 	'/:id',
 	validate(commonValidation.idParams, 'params'),
+	authentification,
 	validate(animalsValidation.update, 'body'),
 	animalsController.update
 );
@@ -70,6 +76,7 @@ animalRouter.patch(
 animalRouter.delete(
 	'/:id',
 	validate(commonValidation.idParams, 'params'),
+	authentification,
 	animalsController.delete
 );
 

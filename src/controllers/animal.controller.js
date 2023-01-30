@@ -165,28 +165,32 @@ const animalsController = {
 	 * Méthode pour créer un nouvel animal
 	 */
 	create: async (req, res, next) => {
-		try {
-			const animal = req.body;
-			const createAnimal = await prismaClient.animal.create({
-				data: {
-					species: animal.species || 'OTHER',
-					name: animal.name,
-					bio: animal.bio,
-					gender: animal.gender,
-					age: new Date(animal.age),
-					size: animal.size,
-					volunteer_experience: animal.volunteer_experience || 'BEGINNER',
-					box_id: Number(animal.box_id),
-				},
-			});
-			// on renvoie les données créées
-			res.status(201).json(createAnimal);
-		} catch (error) {
-			next(
-				new APIError({
-					error,
-				})
-			);
+		if (req.user.admin === true) {
+			try {
+				const animal = req.body;
+				const createAnimal = await prismaClient.animal.create({
+					data: {
+						species: animal.species || 'OTHER',
+						name: animal.name,
+						bio: animal.bio,
+						gender: animal.gender,
+						age: new Date(animal.age),
+						size: animal.size,
+						volunteer_experience: animal.volunteer_experience || 'BEGINNER',
+						box_id: Number(animal.box_id),
+					},
+				});
+				// on renvoie les données créées
+				res.status(201).json(createAnimal);
+			} catch (error) {
+				next(
+					new APIError({
+						error,
+					})
+				);
+			}
+		} else {
+			res.status(401).json({ message: 'INVALID_PERMISSIONS' });
 		}
 	},
 
@@ -194,43 +198,51 @@ const animalsController = {
 	 * Méthode pour mettre a jour un animal spécifique
 	 */
 	update: async (req, res, next) => {
-		try {
-			// on modifie l'animal
-			const animalId = req.params.id;
+		if (req.user.admin === true) {
+			try {
+				// on modifie l'animal
+				const animalId = req.params.id;
 
-			const updatedAnimal = await prismaClient.animal.update({
-				where: {
-					// on cherche l'animal par son id, on converti en number
-					id: Number(animalId),
-				},
-				// on ajoute toutes les données présentes dans req.body
-				data: req.body,
-			});
-			res.json(updatedAnimal);
-		} catch (error) {
-			next(
-				new APIError({
-					error,
-				})
-			);
+				const updatedAnimal = await prismaClient.animal.update({
+					where: {
+						// on cherche l'animal par son id, on converti en number
+						id: Number(animalId),
+					},
+					// on ajoute toutes les données présentes dans req.body
+					data: req.body,
+				});
+				res.json(updatedAnimal);
+			} catch (error) {
+				next(
+					new APIError({
+						error,
+					})
+				);
+			}
+		} else {
+			res.status(401).json({ message: 'INVALID_PERMISSIONS' });
 		}
 	},
 
 	delete: async (req, res, next) => {
-		try {
-			const animalId = req.params.id;
-			await prismaClient.animal.delete({
-				where: {
-					id: Number(animalId),
-				},
-			});
-			res.status(204).json();
-		} catch (error) {
-			next(
-				new APIError({
-					error,
-				})
-			);
+		if (req.user.admin === true) {
+			try {
+				const animalId = req.params.id;
+				await prismaClient.animal.delete({
+					where: {
+						id: Number(animalId),
+					},
+				});
+				res.status(204).json();
+			} catch (error) {
+				next(
+					new APIError({
+						error,
+					})
+				);
+			}
+		} else {
+			res.status(401).json({ message: 'INVALID_PERMISSION' });
 		}
 	},
 

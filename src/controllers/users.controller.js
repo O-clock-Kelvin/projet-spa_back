@@ -82,28 +82,32 @@ const usersController = {
 	create: async (req, res, next) => {
 		try {
 			// on crypte le mot de passe
-			const hashedPassword = await authService.generateHashedPassword(
-				req.body.password
-			);
+			if (req.user.admin === true) {
+				const hashedPassword = await authService.generateHashedPassword(
+					req.body.password
+				);
 
-			// on crée le nouvel utilisateur en base de donnée
-			const createdUser = await prismaClient.user.create({
-				data: {
-					email: req.body.email.toLowerCase(),
-					password: hashedPassword,
-					phone_number: req.body.phone_number,
-					name: req.body.name,
-					firstname: req.body.firstname,
-					admin: req.body.admin || false,
-					experience: req.body.experience || 'BEGINNER',
-				},
-			});
+				// on crée le nouvel utilisateur en base de donnée
+				const createdUser = await prismaClient.user.create({
+					data: {
+						email: req.body.email.toLowerCase(),
+						password: hashedPassword,
+						phone_number: req.body.phone_number,
+						name: req.body.name,
+						firstname: req.body.firstname,
+						admin: req.body.admin || false,
+						experience: req.body.experience || 'BEGINNER',
+					},
+				});
 
-			// on retire le mot de passe de l'objet final
-			delete createdUser.password;
+				// on retire le mot de passe de l'objet final
+				delete createdUser.password;
 
-			// on renvoie les données créées
-			res.status(201).json(createdUser);
+				// on renvoie les données créées
+				res.status(201).json(createdUser);
+			} else {
+				res.status(401).json({ message: 'INVALID_PERMISSIONS' });
+			}
 		} catch (error) {
 			next(
 				new APIError({
@@ -118,32 +122,46 @@ const usersController = {
 	 */
 	update: async (req, res, next) => {
 		try {
-			// si on cherche à modifier le mot de passe
-			let newPassword;
-			if (req.body.password) {
-				newPassword = await authService.generateHashedPassword(
-					req.body.password
-				);
+			if (req.params.id === req.user.id || req.user.admin === true) {
+				// si on cherche à modifier le mot de passe
+				let newPassword;
+				if (req.body.password) {
+					newPassword = await authService.generateHashedPassword(
+						req.body.password
+					);
+				}
+
+				// on modifie l'utilisateur
+				const updatedUser = await prismaClient.user.update({
+					where: {
+						// on cherche l'utilisateur par son id, on convert en number
+						id: Number(req.params.id),
+					},
+					data: {
+						// on ajoute toutes les données présentes dans req.body
+						...req.body,
+						// on ajoute le nouveau password, si pas newPassword=undefined, prisma ne modifiera pas le champ en base de donnée.
+						password: newPassword,
+					},
+				});
+				// on retire le mot de passe de l'objet retourné
+				delete updatedUser.password;
+
+				let jwt;
+				if (req.params.id === req.user.id) {
+					jwt = await authService.generateJWT({
+						id: req.user.id,
+						admin: updatedUser.admin ?? false,
+						firstName: updatedUser.firstname,
+						experience: updatedUser.experience ?? 'BEGINNER',
+					});
+					console.log('JWT', jwt);
+				}
+				// on retourne l'utilisateur mis à jour
+				res.json({ data: updatedUser, token: jwt });
+			} else {
+				res.status(401).json({ message: 'INVALID_PERMISSIONS' });
 			}
-
-			// on modifie l'utilisateur
-			const updatedUser = await prismaClient.user.update({
-				where: {
-					// on cherche l'utilisateur par son id, on convert en number
-					id: Number(req.params.id),
-				},
-				data: {
-					// on ajoute toutes les données présentes dans req.body
-					...req.body,
-					// on ajoute le nouveau password, si pas newPassword=undefined, prisma ne modifiera pas le champ en base de donnée.
-					password: newPassword,
-				},
-			});
-			// on retire le mot de passe de l'objet retourné
-			delete updatedUser.password;
-
-			// on retourne l'utilisateur mis à jour
-			res.json(updatedUser);
 		} catch (error) {
 			next(
 				new APIError({
@@ -158,15 +176,20 @@ const usersController = {
 	 */
 	delete: async (req, res, next) => {
 		try {
-			// on delete l'utilisateur par son id
-			await prismaClient.user.delete({
-				where: {
-					id: Number(req.params.id),
-				},
-			});
+			if (req.params.id === req.user.id || req.user.admin === true) {
+				// on delete l'utilisateur par son id
 
-			// on renvoie un status 204 - no content pour signaler au front que l'utilisateur a bien été supprimé.
-			res.status(204).json([]);
+				await prismaClient.user.delete({
+					where: {
+						id: Number(req.params.id),
+					},
+				});
+
+				// on renvoie un status 204 - no content pour signaler au front que l'utilisateur a bien été supprimé.
+				res.status(204).json([]);
+			} else {
+				res.status(401).json({ message: 'INVALID_PERMISSIONS' });
+			}
 		} catch (error) {
 			next(
 				new APIError({

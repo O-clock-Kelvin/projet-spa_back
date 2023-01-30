@@ -2,6 +2,7 @@
 
 import prismaClient from '../prisma.js';
 import APIError from '../services/APIError.service.js';
+import utilsService from '../services/utils.service.js';
 
 const walksController = {
 	getAll: async (req, res, next) => {
@@ -59,18 +60,42 @@ const walksController = {
 
 	create: async (req, res, next) => {
 		try {
-			const walk = req.body;
-			const createWalk = await prismaClient.walk.create({
-				data: {
-					animal_id: walk.animal_id,
-					user_id: walk.user_id,
-					comment: walk.comment,
-					feeling: walk.feeling || 'GOOD',
-					date: walk.date,
-				},
-			});
-			// on renvoie les données créées
-			res.status(201).json(createWalk);
+			if (!req.user.admin) {
+				const walk = req.body;
+				const animalData = await prismaClient.animal.findUnique({
+					where: { id: walk.animal_id },
+				});
+				if (animalData) {
+					const userData = await prismaClient.user.findUnique({
+						where: { id: walk.user_id },
+					});
+					if (userData) {
+						if (
+							utilsService.experienceToNumber(userData.experience) >=
+							utilsService.experienceToNumber(animalData.volunteer_experience)
+						) {
+							const createWalk = await prismaClient.walk.create({
+								data: {
+									animal_id: walk.animal_id,
+									user_id: walk.user_id,
+									comment: walk.comment,
+									feeling: walk.feeling || 'GOOD',
+									date: walk.date,
+								},
+							});
+							res.status(201).json(createWalk);
+						} else {
+							res.status(401).json({ message: 'INSUFFICIENT_EXPERIENCE' });
+						}
+					} else {
+						res.status(404).json({ message: 'USER_NOT_FOUND' });
+					}
+				} else {
+					res.status(404).json({ message: 'ANIMAL_NOT_FOUND' });
+				}
+			} else {
+				res.status(401).json({ message: 'INVALID_PERMISSIONS' });
+			}
 		} catch (error) {
 			next(
 				new APIError({
@@ -83,15 +108,24 @@ const walksController = {
 	update: async (req, res, next) => {
 		try {
 			const walkId = req.params.id;
-
-			const updatedWalk = await prismaClient.walk.update({
-				where: {
-					id: Number(walkId),
-				},
-
-				data: req.body,
+			const walkData = await prismaClient.walk.findUnique({
+				where: { id: walkId },
 			});
-			res.json(updatedWalk);
+			if (walkData) {
+				if (walkData.user_id === req.user.id || req.user.admin) {
+					const updatedWalk = await prismaClient.walk.update({
+						where: {
+							id: Number(walkId),
+						},
+						data: req.body,
+					});
+					res.json(updatedWalk);
+				} else {
+					res.status(401).json({ message: 'INVALID PERMISSIONS' });
+				}
+			} else {
+				res.status(404).json({ message: 'NOT_FOUND' });
+			}
 		} catch (error) {
 			next(
 				new APIError({
@@ -103,13 +137,17 @@ const walksController = {
 
 	delete: async (req, res, next) => {
 		try {
-			const walkId = req.params.id;
-			await prismaClient.animal.delete({
-				where: {
-					id: Number(walkId),
-				},
-			});
-			res.status(204).json();
+			if (req.user.admin) {
+				const walkId = req.params.id;
+				await prismaClient.animal.delete({
+					where: {
+						id: Number(walkId),
+					},
+				});
+				res.status(204).json();
+			} else {
+				res.status(401).json({ message: 'INVALID_PERMISSIONS' });
+			}
 		} catch (error) {
 			next(
 				new APIError({
