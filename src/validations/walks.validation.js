@@ -15,7 +15,10 @@ const walksValidation = {
 		user_id: Joi.number().integer().required(),
 		animal_id: Joi.number().integer().required(),
 		comment: Joi.string(),
-		feeling: Joi.string().uppercase().valid('BAD', 'MEDIUM', 'BIG').default('GOOD'),
+		feeling: Joi.string()
+			.uppercase()
+			.valid('BAD', 'MEDIUM', 'GOOD')
+			.default('GOOD'),
 		date: Joi.date().default(new Date()),
 	}),
 
@@ -23,8 +26,9 @@ const walksValidation = {
 		user_id: Joi.number().integer(),
 		animal_id: Joi.number().integer(),
 		comment: Joi.string(),
-		feeling: Joi.string().uppercase().valid('BAD', 'MEDIUM', 'BIG'),
+		feeling: Joi.string().uppercase().valid('BAD', 'MEDIUM', 'GOOD'),
 		date: Joi.date(),
+		endDate: Joi.date(),
 	}),
 };
 export default walksValidation;
