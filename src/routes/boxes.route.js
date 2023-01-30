@@ -6,7 +6,7 @@ import validate from '../middlewares/validation.middleware.js';
 import boxesValidation from '../validations/boxes.validation.js';
 import commonValidation from '../validations/common.validation.js';
 import filters from '../middlewares/filters.middleware.js';
-import authentification from '../middlewares/auth.middleware';
+import authentification from '../middlewares/auth.middleware.js';
 /**
  * Router qui gère l'ensemble des routes "boxes"
  */
