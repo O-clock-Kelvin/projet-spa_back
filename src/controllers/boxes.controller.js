@@ -1,6 +1,5 @@
 /** @format */
 
-
 import prismaClient from '../prisma.js';
 import APIError from '../services/APIError.service.js';
 
@@ -63,31 +62,51 @@ const boxesController = {
 			);
 		}
 	},
-	getVisitsOfOneBox: async(req, res, next) => {
+	getVisitsOfOneBox: async (req, res, next) => {
+		const boxId = req.params.id;
+		let nextCursor = null;
+		console.log(req.query);
+		const queryCursor = Number(req.query.cursor);
+		console.log('CURSOR', queryCursor);
 		try {
-			const boxId = req.params.id;	
-			const getVisits = await prismaClient.box.findUnique({
-				include : {				
-					visits : {
-						select : {
-							date : true,
-							comment : true
-						},
-						orderBy: {
-							date : 'desc'
-						}
-					}						
+			const visits = await prismaClient.visit.findMany({
+				where: {
+					box_id: boxId,
 				},
-				where : {
-					id : Number(boxId)
-				}
+				orderBy: {
+					date: 'desc',
+				},
+				cursor:
+					queryCursor !== 0
+						? {
+								id: queryCursor,
+						  }
+						: undefined,
+				skip: queryCursor !== 0 ? 1 : undefined,
+				take: queryCursor != null ? 3 : undefined,
 			});
-			if(!getVisits){
-				res.status(404).json({ message: 'NOT_FOUND' });
-			}else{
-				res.json(getVisits);
+
+			if (visits.length > 0) {
+				nextCursor = await prismaClient.visit.findFirst({
+					where: {
+						box_id: boxId,
+					},
+					orderBy: {
+						date: 'desc',
+					},
+					cursor: {
+						id: visits[visits.length - 1].id,
+					},
+					skip: 1,
+					take: 1,
+				});
 			}
-			
+
+			if (!visits) {
+				res.status(404).json({ message: 'NOT_FOUND' });
+			} else {
+				res.json({ visits, nextCursor: nextCursor?.id || null });
+			}
 		} catch (error) {
 			next(
 				new APIError({
@@ -95,7 +114,6 @@ const boxesController = {
 				})
 			);
 		}
-
 	},
 
 	create: async (req, res, next) => {
