@@ -16,7 +16,6 @@ const animalsController = {
 
 		try {
 			const animals = await prismaClient.animal.findMany({
-				// include: includeTags,
 				where: {
 					...req.filters,
 					...(tagsList && {
@@ -29,7 +28,7 @@ const animalsController = {
 						},
 					}),
 				},
-				// include: includeTags,
+
 				include: {
 					/**
 					 * 1) la notation (!!) permet de "caster" une expression vers un boolean (true/false)
