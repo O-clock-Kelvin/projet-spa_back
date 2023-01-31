@@ -3,27 +3,31 @@
 import qs from 'qs';
 import prismaClient from '../prisma.js';
 import APIError from '../services/APIError.service.js';
-import filtersService from '../services/filters.service.js';
 
 const animalsController = {
 	/**
 	 * Méthode pour récupérer tous les animaux en base de donnée
 	 */
 	getAll: async (req, res, next) => {
-		let whereTagsRequest;
-		if (req.filters.tagsList) {
-			whereTagsRequest = filtersService.filterByAnimalTags(
-				req.filters.tagsList
-			);
-			delete req.filters.tagsList;
-		}
+		const { tagsList } = req.filters;
+
+		// On supprime la tagsList pour ne pas faire bugger la requête
+		delete req.filters.tagsList;
 
 		try {
 			const animals = await prismaClient.animal.findMany({
 				// include: includeTags,
 				where: {
 					...req.filters,
-					...whereTagsRequest,
+					...(tagsList && {
+						tags: {
+							some: {
+								tag_id: {
+									in: tagsList,
+								},
+							},
+						},
+					}),
 				},
 				// include: includeTags,
 				include: {
@@ -65,7 +69,7 @@ const animalsController = {
 		const animalId = req.params.id;
 
 		const queryParams = qs.parse(req.query, { comma: true });
-		console.log(queryParams);
+
 		try {
 			// si l'animal existe, on soumet la requete en bdd//
 			const getAnimal = await prismaClient.animal.findUnique({
@@ -110,9 +114,9 @@ const animalsController = {
 	getWalksOfAnimal: async (req, res, next) => {
 		const animalId = req.params.id;
 		let nextCursor = null;
-		console.log(req.query);
+
 		const queryCursor = Number(req.query.cursor);
-		console.log('CURSOR', queryCursor);
+
 		try {
 			const walks = await prismaClient.walk.findMany({
 				where: {
