@@ -35,9 +35,10 @@ const animalsValidation = {
 		name: Joi.string().required(),
 		bio: Joi.string(),
 		url_image: Joi.string().uri(),
-		age: Joi.date(),
+		age: Joi.date().required(),
 		gender: Joi.string().uppercase().valid('MALE', 'FEMALE').required(),
 		size: Joi.string().uppercase().valid('SMALL', 'MEDIUM', 'BIG').required(),
+		tags: Joi.array().items(Joi.number().integer().min(1)),
 		volunteer_experience: Joi.string()
 			.uppercase()
 			.valid('BEGINNER', 'MEDIUM', 'EXPERT')
