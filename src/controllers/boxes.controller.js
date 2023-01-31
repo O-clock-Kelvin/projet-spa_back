@@ -1,5 +1,6 @@
 /** @format */
 
+import qs from 'qs';
 import prismaClient from '../prisma.js';
 import APIError from '../services/APIError.service.js';
 
@@ -25,9 +26,18 @@ const boxesController = {
 
 	getOne: async (req, res, next) => {
 		try {
+			const queryParams = qs.parse(req.query, { comma: true });
 			const box = await prismaClient.box.findUnique({
 				where: {
 					id: Number(req.params.id),
+				},
+				include: {
+					animals: !!queryParams.include?.includes('animals'),
+					visits: queryParams.include.includes('visits') ?? {
+						orderBy: {
+							date: 'desc',
+						},
+					},
 				},
 			});
 
