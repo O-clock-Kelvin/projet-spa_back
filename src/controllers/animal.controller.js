@@ -171,6 +171,15 @@ const animalsController = {
 		if (req.user.admin === true) {
 			try {
 				const animal = req.body;
+
+				// création de l'objet permettant la relation avec les tags au sein de la table de liaison
+				let tagCreation;
+				if (animal.tags) {
+					tagCreation = animal.tags.map((tag) => ({
+						tag_id: tag,
+					}));
+				}
+
 				const createAnimal = await prismaClient.animal.create({
 					data: {
 						species: animal.species || 'OTHER',
@@ -181,6 +190,9 @@ const animalsController = {
 						size: animal.size,
 						volunteer_experience: animal.volunteer_experience || 'BEGINNER',
 						box_id: Number(animal.box_id),
+						tags: {
+							create: tagCreation,
+						},
 					},
 				});
 				// on renvoie les données créées
