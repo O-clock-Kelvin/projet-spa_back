@@ -40,6 +40,7 @@ const animalsController = {
 					 */
 
 					walks: !!req.include?.includes('walks'),
+					box: !!req.include?.includes('box'),
 					tags: req.include?.includes('tags')
 						? {
 								include: {
@@ -67,6 +68,7 @@ const animalsController = {
 	getOne: async (req, res, next) => {
 		const animalId = req.params.id;
 
+		// on parse la query pour récupérer la requête en objet
 		const queryParams = qs.parse(req.query, { comma: true });
 
 		try {
@@ -90,6 +92,7 @@ const animalsController = {
 								},
 						  }
 						: false,
+					box: !!queryParams.include?.includes('box'),
 				},
 			});
 
