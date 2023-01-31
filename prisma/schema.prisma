@@ -70,6 +70,7 @@ model Walk {
 model Visit {
   id      Int      @id() @default(autoincrement())
   date    DateTime @db.Timestamptz()
+  end_date DateTime? @db.Timestamptz()
   comment String?
 
   user    User @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
