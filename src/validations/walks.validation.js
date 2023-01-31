@@ -25,7 +25,7 @@ const walksValidation = {
 	update: Joi.object({
 		user_id: Joi.number().integer(),
 		animal_id: Joi.number().integer(),
-		comment: Joi.string(),
+		comment: Joi.string().allow(null, ''),
 		feeling: Joi.string().uppercase().valid('BAD', 'MEDIUM', 'GOOD'),
 		date: Joi.date(),
 		end_date: Joi.date(),

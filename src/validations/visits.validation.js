@@ -19,8 +19,9 @@ const visitsValidation = {
 	update: Joi.object({
 		user_id: Joi.number().integer(),
 		box_id: Joi.number().integer(),
-		comment: Joi.string(),
+		comment: Joi.string().allow(null, ''),
 		date: Joi.date(),
+		end_date: Joi.date(),
 	}),
 };
 export default visitsValidation;
