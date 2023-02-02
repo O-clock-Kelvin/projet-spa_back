@@ -8,7 +8,7 @@ import Jwt from 'jsonwebtoken';
  * @param {*} next
  * @example app.get('/protectedroute,authMiddleware,routeController)
  */
-const authMiddleWare = (req, res, next) => {
+const authentification = (req, res, next) => {
 	if (
 		req.headers &&
 		req.headers.authorization &&
@@ -34,4 +34,4 @@ const authMiddleWare = (req, res, next) => {
 		res.status(401).send({ message: 'MISSING_TOKEN' });
 	}
 };
-export default authMiddleWare;
+export default authentification;

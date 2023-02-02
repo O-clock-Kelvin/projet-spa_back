@@ -6,6 +6,7 @@ import validate from '../middlewares/validation.middleware.js';
 import boxesValidation from '../validations/boxes.validation.js';
 import commonValidation from '../validations/common.validation.js';
 import filters from '../middlewares/filters.middleware.js';
+import authentification from '../middlewares/auth.middleware.js';
 /**
  * Router qui gère l'ensemble des routes "boxes"
  */
@@ -19,28 +20,40 @@ const boxRouter = express.Router();
 
 boxRouter.get(
 	'/',
+	authentification,
 	filters(boxesValidation.queryFilters),
 	boxesController.getAll
 );
 
-boxRouter.get('/tovisit', boxesController.toVisit);
+boxRouter.get('/tovisit', authentification, boxesController.toVisit);
 
-/* je veux connaitre les animaux d'une box
+/* je veux connaitre les animaux d'un box
  */
-// router.get('/boxes/:id/animals');
-
 boxRouter.get(
 	'/:id/animals',
 	validate(commonValidation.idParams, 'params'),
+	authentification,
 	boxesController.getAnimals
 );
 
 /**
- * Récupère une box
+ * Récupère l'historique des visites d'un box unique
+ */
+boxRouter.get(
+	'/:id/visits',
+	validate(commonValidation.idParams, 'params'),
+	authentification,
+	boxesController.getVisitsOfOneBox
+);
+
+/**
+ * Récupère un box
  */
 boxRouter.get(
 	'/:id',
+
 	validate(commonValidation.idParams, 'params'),
+	authentification,
 	boxesController.getOne
 );
 
@@ -50,6 +63,7 @@ boxRouter.get(
  */
 boxRouter.post(
 	'/',
+	authentification,
 	validate(boxesValidation.create, 'body'),
 	boxesController.create
 );
@@ -61,6 +75,7 @@ boxRouter.post(
 boxRouter.patch(
 	'/:id',
 	validate(commonValidation.idParams, 'params'),
+	authentification,
 	validate(boxesValidation.update, 'body'),
 	boxesController.update
 );
@@ -71,6 +86,7 @@ boxRouter.patch(
 boxRouter.delete(
 	'/:id',
 	validate(commonValidation.idParams, 'params'),
+	authentification,
 	boxesController.delete
 );
 

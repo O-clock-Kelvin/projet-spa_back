@@ -1,5 +1,6 @@
 /** @format */
 
+import qs from 'qs';
 import prismaClient from '../prisma.js';
 import APIError from '../services/APIError.service.js';
 
@@ -8,26 +9,46 @@ const animalsController = {
 	 * Méthode pour récupérer tous les animaux en base de donnée
 	 */
 	getAll: async (req, res, next) => {
-		/**
-		 * Ajout des tags en include si demandés
-		 */
-		let includeTags;
-		if (req.include) {
-			if (req.include.includes('tags')) {
-				includeTags = {
-					tags: {
-						include: {
-							tag: true,
-						},
-					},
-				};
-			}
-		}
+		const { tagsList } = req.filters;
+
+		// On supprime la tagsList pour ne pas faire bugger la requête
+		delete req.filters.tagsList;
 
 		try {
 			const animals = await prismaClient.animal.findMany({
-				where: req.filters,
-				include: includeTags,
+				where: {
+					...req.filters,
+					...(tagsList && {
+						tags: {
+							some: {
+								tag_id: {
+									in: tagsList,
+								},
+							},
+						},
+					}),
+				},
+
+				include: {
+					/**
+					 * 1) la notation (!!) permet de "caster" une expression vers un boolean (true/false)
+					 * => https://brianflove.com/2014-09-02/whats-the-double-exclamation-mark-for-in-javascript/
+					 *
+					 * 2) la notation "req.include?.includes" permet de vérifier que l'objet "req.include" existe bien. Si il existe, la méthode "includes" s'exécute, sinon la variable
+					 * est définie comme undefined
+					 * => https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Optional_chaining
+					 */
+
+					walks: !!req.include?.includes('walks'),
+					box: !!req.include?.includes('box'),
+					tags: req.include?.includes('tags')
+						? {
+								include: {
+									tag: true,
+								},
+						  }
+						: false,
+				},
 				orderBy: req.sort,
 				skip: req.pagination.skip,
 				take: req.pagination.take,
@@ -46,16 +67,38 @@ const animalsController = {
 	 */
 	getOne: async (req, res, next) => {
 		const animalId = req.params.id;
+
+		// on parse la query pour récupérer la requête en objet
+		const queryParams = qs.parse(req.query, { comma: true });
+
 		try {
 			// si l'animal existe, on soumet la requete en bdd//
 			const getAnimal = await prismaClient.animal.findUnique({
 				where: {
 					id: Number(animalId),
 				},
+				include: {
+					walks: queryParams.include?.includes('walks')
+						? {
+								orderBy: {
+									id: 'asc',
+								},
+						  }
+						: false,
+					tags: queryParams.include?.includes('tags')
+						? {
+								include: {
+									tag: true,
+								},
+						  }
+						: false,
+					box: !!queryParams.include?.includes('box'),
+				},
 			});
+
 			// si l'animal n'est pas trouvé en bdd on passe au middleware handlerError
 			if (!getAnimal) {
-				res.status(404).json([]);
+				res.status(404).json({ message: 'NOT_FOUND' });
 			} else {
 				res.json(getAnimal);
 			}
@@ -70,30 +113,52 @@ const animalsController = {
 	/**
 	 * Méthode pour récupérer l'historique des balades d'un animal en particulier
 	 */
-	getWalksOfAnimal: async(req,res,next) => {
+	getWalksOfAnimal: async (req, res, next) => {
 		const animalId = req.params.id;
-		try{
-			const getWalksOfAnimal = await prismaClient.animal.findUnique({
-				include : {				
-					walks : {
-						select : {
-							date : true,
-							comment : true,
-							feeling : true
-						},
-						orderBy: {
-							date : 'desc'
-						}
-					}						
+		let nextCursor = null;
+
+		const queryCursor = Number(req.query.cursor);
+
+		try {
+			const walks = await prismaClient.walk.findMany({
+				where: {
+					animal_id: animalId,
 				},
-				where : {
-					id : animalId
-				}
-				
+				orderBy: {
+					date: 'desc',
+				},
+				cursor:
+					queryCursor !== 0
+						? {
+								id: queryCursor,
+						  }
+						: undefined,
+				skip: queryCursor !== 0 ? 1 : undefined,
+				take: queryCursor != null ? 3 : undefined,
 			});
-			res.json(getWalksOfAnimal);
-		
-		}catch(error){
+
+			if (walks.length > 0) {
+				nextCursor = await prismaClient.walk.findFirst({
+					where: {
+						animal_id: animalId,
+					},
+					orderBy: {
+						date: 'desc',
+					},
+					cursor: {
+						id: walks[walks.length - 1].id,
+					},
+					skip: 1,
+					take: 1,
+				});
+			}
+
+			if (!walks) {
+				res.status(404).json({ message: 'NOT_FOUND' });
+			} else {
+				res.json({ walks, nextCursor: nextCursor?.id || null });
+			}
+		} catch (error) {
 			next(
 				new APIError({
 					error,
@@ -101,75 +166,101 @@ const animalsController = {
 			);
 		}
 	},
+
 	/**
 	 * Méthode pour créer un nouvel animal
 	 */
 	create: async (req, res, next) => {
+		if (req.user.admin === true) {
+			try {
+				const animal = req.body;
 
-		try {
-			const animal = req.body;
-			const createAnimal = await prismaClient.animal.create({
-				data: {
-					species: animal.species || 'OTHER',
-					name: animal.name,
-					bio: animal.bio,
-					gender: animal.gender,
-					age: new Date(animal.age),
-					size: animal.size,
-					volunteer_experience: animal.volunteer_experience || 'BEGINNER',
-					box_id: Number(animal.box_id),
-				},
-			});
-			// on renvoie les données créées
-			res.status(201).json(createAnimal);
-		} catch (error) {
-			next(
-				new APIError({
-					error,
-				})
-			);
+				// création de l'objet permettant la relation avec les tags au sein de la table de liaison
+				let tagCreation;
+				if (animal.tags) {
+					tagCreation = animal.tags.map((tag) => ({
+						tag_id: tag,
+					}));
+				}
+
+				const createAnimal = await prismaClient.animal.create({
+					data: {
+						species: animal.species || 'OTHER',
+						name: animal.name,
+						bio: animal.bio,
+						gender: animal.gender,
+						age: new Date(animal.age),
+						size: animal.size,
+						volunteer_experience: animal.volunteer_experience || 'BEGINNER',
+						box_id: Number(animal.box_id),
+						tags: {
+							create: tagCreation,
+						},
+					},
+				});
+				// on renvoie les données créées
+				res.status(201).json(createAnimal);
+			} catch (error) {
+				next(
+					new APIError({
+						error,
+					})
+				);
+			}
+		} else {
+			res.status(401).json({ message: 'INVALID_PERMISSIONS' });
 		}
 	},
+
 	/**
 	 * Méthode pour mettre a jour un animal spécifique
 	 */
 	update: async (req, res, next) => {
-		try {
-			// on modifie l'animal
-			const animalId = req.params.id;
+		if (req.user.admin === true) {
+			try {
+				// on modifie l'animal
+				const animalId = req.params.id;
 
-			const updatedAnimal = await prismaClient.animal.update({
-				where: {
-					// on cherche l'animal par son id, on converti en number
-					id: Number(animalId),
-				},
-				// on ajoute toutes les données présentes dans req.body
-				data: req.body,
-			});
-			res.json(updatedAnimal);
-		} catch (error) {
-			next(
-				new APIError({
-					error,
-				})
-			);
+				const updatedAnimal = await prismaClient.animal.update({
+					where: {
+						// on cherche l'animal par son id, on converti en number
+						id: Number(animalId),
+					},
+					// on ajoute toutes les données présentes dans req.body
+					data: req.body,
+				});
+				res.json(updatedAnimal);
+			} catch (error) {
+				next(
+					new APIError({
+						error,
+					})
+				);
+			}
+		} else {
+			res.status(401).json({ message: 'INVALID_PERMISSIONS' });
 		}
 	},
+
 	delete: async (req, res, next) => {
-		try {
-			const animalId = req.params.id;
-			await prismaClient.animal.delete({
-				where: {
-					id: Number(animalId),
-				},
-			});
-			res.status(204).json();
-		} catch (error) {
-			next(
-				new APIError({
-					error,
-				})
-			);
+		if (req.user.admin === true) {
+			try {
+				const animalId = req.params.id;
+				await prismaClient.animal.delete({
+					where: {
+						id: Number(animalId),
+					},
+				});
+				res.status(204).json();
+			} catch (error) {
+				next(
+					new APIError({
+						error,
+					})
+				);
+			}
+		} else {
+			res.status(401).json({ message: 'INVALID_PERMISSION' });
 		}
 	},
 

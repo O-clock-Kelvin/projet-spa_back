@@ -11,13 +11,11 @@ const visitsController = {
 			if (req.include) {
 				if (req.include.includes('user')) {
 					includeList = { ...includeList, user: true };
-			
 				}
 
 				if (req.include.includes('box')) {
 					includeList = { ...includeList, box: true };
 				}
-			
 			}
 
 			const visits = await prismaClient.visit.findMany({
@@ -49,7 +47,7 @@ const visitsController = {
 			if (visit) {
 				res.json(visit);
 			} else {
-				res.status(404).json([]);
+				res.status(404).json({ message: 'NOT_FOUND' });
 			}
 		} catch (error) {
 			next(
@@ -88,17 +86,29 @@ const visitsController = {
 	 */
 	update: async (req, res, next) => {
 		try {
-			const updatedVisit = await prismaClient.visit.update({
-				where: {
-					id: Number(req.params.id),
-				},
-				data: {
-					// on ajoute toutes les données présentes dans req.body
-					...req.body,
-				},
+			const visitData = await prismaClient.visit.findUnique({
+				where: { id: req.params.id },
 			});
-			// on retourne la visite mise à jour
-			res.json(updatedVisit);
+
+			if (visitData) {
+				if (visitData.user_id === req.user.id || req.user.admin === true) {
+					const updatedVisit = await prismaClient.visit.update({
+						where: {
+							id: Number(req.params.id),
+						},
+						data: {
+							// on ajoute toutes les données présentes dans req.body
+							...req.body,
+						},
+					});
+					// on retourne la visite mise à jour
+					res.json(updatedVisit);
+				} else {
+					res.status(401).json({ message: 'INVALID_PERMISSIONS' });
+				}
+			} else {
+				res.status(404).json({ message: 'NOT_FOUND' });
+			}
 		} catch (error) {
 			next(
 				new APIError({
@@ -110,15 +120,19 @@ const visitsController = {
 
 	delete: async (req, res, next) => {
 		try {
-			// on delete l'utilisateur par son id
-			await prismaClient.visit.delete({
-				where: {
-					id: Number(req.params.id),
-				},
-			});
+			if (req.user.admin === true) {
+				// on delete l'utilisateur par son id
+				await prismaClient.visit.delete({
+					where: {
+						id: Number(req.params.id),
+					},
+				});
 
-			// on renvoie un status 204 - no content pour signaler au front que l'utilisateur a bien été supprimé.
-			res.status(204).json([]);
+				// on renvoie un status 204 - no content pour signaler au front que l'utilisateur a bien été supprimé.
+				res.status(204).json([]);
+			} else {
+				res.status(401).json({ message: 'INVALID_PERMISSIONS' });
+			}
 		} catch (error) {
 			next(
 				new APIError({

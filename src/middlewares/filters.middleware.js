@@ -1,8 +1,8 @@
 /** @format */
 
-import qs from 'qs';
-import Joi from 'joi';
-import APIError from '../services/APIError.service.js';
+import qs from "qs";
+import Joi from "joi";
+import APIError from "../services/APIError.service.js";
 
 /**
  * On crée une fonction qui retourne une fonction, c'est l'équivalent formatté de ce code:
@@ -34,11 +34,6 @@ const filters = (schema) => (req, res, next) => {
 	 * si "sort" est contenu dans le tableau parsedQuery
 	 */
 
-	/**
-	 * @todo
-	 * en cas de sort != array, traiter le truc
-	 */
-
 	if (parsedQuery.sort) {
 		// notre paramètre "sort" arrive dans cette forme " sort: ['-createdAt', ' id'] " => traduction: je veux trier par date décroissante et par id.
 		// On souhaite obtenir un objet de ce format: {createdAt:"desc", id:"asc"}
@@ -49,20 +44,20 @@ const filters = (schema) => (req, res, next) => {
 		// si un schema Joi est passé en paramètre du middleware, on récupère les champs du schema sans les valider
 		const schemaDescription = schema ? schema.describe() : undefined;
 
-		if (typeof parsedQuery.sort === 'string') {
-			const itemName = parsedQuery.sort.replace('-', '').replaceAll(' ', '');
+		if (typeof parsedQuery.sort === "string") {
+			const itemName = parsedQuery.sort.replace("-", "").replaceAll(" ", "");
 
 			if (schemaDescription === undefined || schemaDescription.keys[itemName]) {
-				if (parsedQuery.sort.startsWith('-')) {
+				if (parsedQuery.sort.startsWith("-")) {
 					// si l'élement commence par "-", celà signfie qu'on cherche un ordre descendant
-					sort = { [itemName]: 'desc' }; // on vient ajouter l'élément à l'objet, la notation [item] permet de ne pas récupérer la valeur de la variable mais son nom, puis on retire le "-"" de son nom
+					sort = { [itemName]: "desc" }; // on vient ajouter l'élément à l'objet, la notation [item] permet de ne pas récupérer la valeur de la variable mais son nom, puis on retire le "-"" de son nom
 				} else {
-					sort = { [itemName]: 'asc' };
+					sort = { [itemName]: "asc" };
 				}
 				// si l'élément ne commence pas par "-", celà signifie qu'on cherche un ordre croissant
 			} // {createdAt:"desc", id:"asc"} => pourra être utilisé dans notre requête prisma
 		} else {
-			throw new APIError({ code: 400, message: 'INVALID_SORT_PARAMETER' });
+			throw new APIError({ code: 400, message: "INVALID_SORT_PARAMETER" });
 		}
 
 		req.sort = sort; // => req.sort = {createdAt:"desc", id:"asc"}, pourra être utilisé dans prisma
@@ -93,11 +88,11 @@ const filters = (schema) => (req, res, next) => {
 		if (Array.isArray(parsedQuery.include)) {
 			const includeList = [];
 			parsedQuery.include.forEach((includedRelation) => {
-				includeList.push(includedRelation.replaceAll(' ', '')); // on retire tous les espaces du parametre include
+				includeList.push(includedRelation.replaceAll(" ", "")); // on retire tous les espaces du parametre include
 			});
 			req.include = includeList;
 		} else {
-			const includeParams = parsedQuery.include.replaceAll(' ', ''); // on retire tous les espaces du parametre include
+			const includeParams = parsedQuery.include.replaceAll(" ", ""); // on retire tous les espaces du parametre include
 			req.include = [includeParams]; // on passe les relations à include dans la requête
 		}
 	}
