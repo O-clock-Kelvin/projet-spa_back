@@ -1,6 +1,6 @@
 /** @format */
 
-import Joi from 'joi';
+import Joi from "joi";
 
 const animalsValidation = {
 	queryFilters: Joi.object({
@@ -8,10 +8,10 @@ const animalsValidation = {
 			Joi.number().integer(),
 			Joi.object().pattern(/^/, Joi.number().integer()),
 		],
-		species: Joi.string().uppercase().valid('CAT', 'DOG', 'OTHER'),
+		species: Joi.string().uppercase().valid("CAT", "DOG", "OTHER"),
 		name: [Joi.string(), Joi.object().pattern(/^/, Joi.string())],
-		gender: Joi.string().uppercase().valid('MALE', 'FEMALE'),
-		size: Joi.string().uppercase().valid('SMALL', 'MEDIUM', 'BIG'),
+		gender: Joi.string().uppercase().valid("MALE", "FEMALE"),
+		size: Joi.string().uppercase().valid("SMALL", "MEDIUM", "BIG"),
 		age: [
 			Joi.date().iso().options({ convert: true }),
 			Joi.object().pattern(/^/, Joi.date().iso().options({ convert: true })),
@@ -21,9 +21,12 @@ const animalsValidation = {
 			Joi.number().integer().min(1),
 			Joi.array().items(Joi.number().integer().min(1)),
 		],
-		volunteer_experience: Joi.string()
-			.uppercase()
-			.valid('BEGINNER', 'MEDIUM', 'EXPERT'),
+		volunteer_experience: [
+			Joi.string().uppercase().valid("BEGINNER", "MEDIUM", "EXPERT"),
+			Joi.array().items(
+				Joi.string().uppercase().valid("BEGINNER", "MEDIUM", "EXPERT")
+			),
+		],
 		box_id: [
 			Joi.number().integer(),
 			Joi.object().pattern(/^/, Joi.number().integer()),
@@ -31,31 +34,31 @@ const animalsValidation = {
 	}),
 
 	create: Joi.object({
-		species: Joi.string().uppercase().valid('CAT', 'DOG', 'OTHER').required(),
+		species: Joi.string().uppercase().valid("CAT", "DOG", "OTHER").required(),
 		name: Joi.string().required(),
 		bio: Joi.string(),
 		url_image: Joi.string().uri(),
 		age: Joi.date().required(),
-		gender: Joi.string().uppercase().valid('MALE', 'FEMALE').required(),
-		size: Joi.string().uppercase().valid('SMALL', 'MEDIUM', 'BIG').required(),
+		gender: Joi.string().uppercase().valid("MALE", "FEMALE").required(),
+		size: Joi.string().uppercase().valid("SMALL", "MEDIUM", "BIG").required(),
 		tags: Joi.array().items(Joi.number().integer().min(1)),
 		volunteer_experience: Joi.string()
 			.uppercase()
-			.valid('BEGINNER', 'MEDIUM', 'EXPERT')
-			.default('BEGINNER'),
+			.valid("BEGINNER", "MEDIUM", "EXPERT")
+			.default("BEGINNER"),
 		box_id: Joi.number(),
 	}),
 
 	update: Joi.object({
-		species: Joi.string().uppercase().valid('CAT', 'DOG', 'OTHER'),
+		species: Joi.string().uppercase().valid("CAT", "DOG", "OTHER"),
 		name: Joi.string(),
 		bio: Joi.string(),
 		url_image: Joi.string().uri(),
-		gender: Joi.string().uppercase().valid('MALE', 'FEMALE'),
-		size: Joi.string().uppercase().valid('SMALL', 'MEDIUM', 'BIG'),
+		gender: Joi.string().uppercase().valid("MALE", "FEMALE"),
+		size: Joi.string().uppercase().valid("SMALL", "MEDIUM", "BIG"),
 		volunteer_experience: Joi.string()
 			.uppercase()
-			.valid('BEGINNER', 'MEDIUM', 'EXPERT'),
+			.valid("BEGINNER", "MEDIUM", "EXPERT"),
 		box_id: Joi.number(),
 	}),
 };
