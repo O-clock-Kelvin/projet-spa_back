@@ -1,8 +1,9 @@
 /** @format */
 
-import qs from "qs";
-import prismaClient from "../prisma.js";
-import APIError from "../services/APIError.service.js";
+import qs from 'qs';
+import prismaClient from '../prisma.js';
+import APIError from '../services/APIError.service.js';
+import uploadService from '../services/upload.service.js';
 
 const animalsController = {
 	/**
@@ -57,9 +58,9 @@ const animalsController = {
 					 * => https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Optional_chaining
 					 */
 
-					walks: !!req.include?.includes("walks"),
-					box: !!req.include?.includes("box"),
-					tags: req.include?.includes("tags")
+					walks: !!req.include?.includes('walks'),
+					box: !!req.include?.includes('box'),
+					tags: req.include?.includes('tags')
 						? {
 								include: {
 									tag: true,
@@ -96,27 +97,27 @@ const animalsController = {
 					id: Number(animalId),
 				},
 				include: {
-					walks: queryParams.include?.includes("walks")
+					walks: queryParams.include?.includes('walks')
 						? {
 								orderBy: {
-									id: "asc",
+									id: 'asc',
 								},
 						  }
 						: false,
-					tags: queryParams.include?.includes("tags")
+					tags: queryParams.include?.includes('tags')
 						? {
 								include: {
 									tag: true,
 								},
 						  }
 						: false,
-					box: !!queryParams.include?.includes("box"),
+					box: !!queryParams.include?.includes('box'),
 				},
 			});
 
 			// si l'animal n'est pas trouvé en bdd on passe au middleware handlerError
 			if (!getAnimal) {
-				res.status(404).json({ message: "NOT_FOUND" });
+				res.status(404).json({ message: 'NOT_FOUND' });
 			} else {
 				res.json(getAnimal);
 			}
@@ -143,7 +144,7 @@ const animalsController = {
 					animal_id: animalId,
 				},
 				orderBy: {
-					date: "desc",
+					date: 'desc',
 				},
 				cursor:
 					queryCursor !== 0
@@ -161,7 +162,7 @@ const animalsController = {
 						animal_id: animalId,
 					},
 					orderBy: {
-						date: "desc",
+						date: 'desc',
 					},
 					cursor: {
 						id: walks[walks.length - 1].id,
@@ -172,7 +173,7 @@ const animalsController = {
 			}
 
 			if (!walks) {
-				res.status(404).json({ message: "NOT_FOUND" });
+				res.status(404).json({ message: 'NOT_FOUND' });
 			} else {
 				res.json({ walks, nextCursor: nextCursor?.id || null });
 			}
@@ -201,19 +202,33 @@ const animalsController = {
 					}));
 				}
 
+				// Gestion de l'upload d'image
+				if (req.file) {
+					const fileExtension = req.file.originalname.split('.').pop();
+
+					const urlImage = await uploadService.upload(
+						'animals',
+						fileExtension,
+						req.file.buffer
+					);
+
+					animal.url_image = urlImage;
+				}
+
 				const createAnimal = await prismaClient.animal.create({
 					data: {
-						species: animal.species || "OTHER",
+						species: animal.species || 'OTHER',
 						name: animal.name,
 						bio: animal.bio,
 						gender: animal.gender,
 						age: new Date(animal.age),
 						size: animal.size,
-						volunteer_experience: animal.volunteer_experience || "BEGINNER",
+						volunteer_experience: animal.volunteer_experience || 'BEGINNER',
 						box_id: Number(animal.box_id),
 						tags: {
 							create: tagCreation,
 						},
+						url_image: animal.url_image,
 					},
 				});
 				// on renvoie les données créées
@@ -226,7 +241,7 @@ const animalsController = {
 				);
 			}
 		} else {
-			res.status(401).json({ message: "INVALID_PERMISSIONS" });
+			res.status(401).json({ message: 'INVALID_PERMISSIONS' });
 		}
 	},
 
@@ -236,9 +251,25 @@ const animalsController = {
 	update: async (req, res, next) => {
 		if (req.user.admin === true) {
 			try {
-				// on modifie l'animal
-				const animalId = req.params.id;
+				/**
+				 * On gère le cas d'un upload d'image pour l'animal
+				 */
+				if (req.file) {
+					// On récupère l'exension du fichier, puis on lui attribue un nom aléatoire
+					const fileExtension = req.file.originalname.split('.').pop();
 
+					// On fait appel à notre service d'upload qui transmet les données sur les serveurs d'AWS, et retourne le lien de l'image
+					const urlImage = await uploadService.upload(
+						'animals',
+						fileExtension,
+						req.file.buffer
+					);
+
+					// on ajoute le lien récupéré dans le req.body, pour ensuite le passer dans Prisma pour changer le champ url_image de l'animal en base de donnée
+					req.body.url_image = urlImage;
+				}
+
+				const animalId = req.params.id;
 				const updatedAnimal = await prismaClient.animal.update({
 					where: {
 						// on cherche l'animal par son id, on converti en number
@@ -247,6 +278,7 @@ const animalsController = {
 					// on ajoute toutes les données présentes dans req.body
 					data: req.body,
 				});
+
 				res.json(updatedAnimal);
 			} catch (error) {
 				next(
@@ -256,7 +288,7 @@ const animalsController = {
 				);
 			}
 		} else {
-			res.status(401).json({ message: "INVALID_PERMISSIONS" });
+			res.status(401).json({ message: 'INVALID_PERMISSIONS' });
 		}
 	},
 
@@ -278,7 +310,7 @@ const animalsController = {
 				);
 			}
 		} else {
-			res.status(401).json({ message: "INVALID_PERMISSION" });
+			res.status(401).json({ message: 'INVALID_PERMISSION' });
 		}
 	},
 
@@ -289,7 +321,7 @@ const animalsController = {
 		try {
 			const animalsToWalk = await prismaClient.AnimalsToWalk.findMany({
 				where: {
-					species: "DOG",
+					species: 'DOG',
 				},
 				skip: Number(req.query.skip) || 0,
 				take: Number(req.query.take) || undefined,

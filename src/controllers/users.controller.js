@@ -1,9 +1,10 @@
 /** @format */
 
-import prismaClient from "../prisma.js";
-import APIError from "../services/APIError.service.js";
-import authService from "../services/auth.service.js";
-import mailService from "../services/mail.service.js";
+import prismaClient from '../prisma.js';
+import APIError from '../services/APIError.service.js';
+import authService from '../services/auth.service.js';
+import mailService from '../services/mail.service.js';
+import uploadService from '../services/upload.service.js';
 
 const usersController = {
 	/**
@@ -65,7 +66,7 @@ const usersController = {
 			if (user) {
 				res.json(user);
 			} else {
-				res.status(404).json({ message: "NOT_FOUND" });
+				res.status(404).json({ message: 'NOT_FOUND' });
 			}
 		} catch (error) {
 			next(
@@ -89,6 +90,17 @@ const usersController = {
 					req.body.password
 				);
 
+				if (req.file) {
+					const fileExtension = req.file.originalname.split('.').pop();
+
+					const urlImage = await uploadService.upload(
+						'users',
+						fileExtension,
+						req.file.buffer
+					);
+
+					req.body.url_image = urlImage;
+				}
 				// on crée le nouvel utilisateur en base de donnée
 				const createdUser = await prismaClient.user.create({
 					data: {
@@ -98,17 +110,18 @@ const usersController = {
 						name: req.body.name,
 						firstname: req.body.firstname,
 						admin: req.body.admin || false,
-						experience: req.body.experience || "BEGINNER",
+						experience: req.body.experience || 'BEGINNER',
+						url_image: req.body.url_image,
 					},
 				});
 
 				// On envoie un mail à l'aide de notre service
 				await mailService.sendTemplateEmail({
-					senderName: "ToutOPoils",
-					senderEmail: "contact@toutopoils.fr",
+					senderName: 'ToutOPoils',
+					senderEmail: 'contact@toutopoils.fr',
 					recipient: createdUser.email,
 					title: `Bienvenue sur ToutOPoils !`,
-					template: "register",
+					template: 'register',
 					data: {
 						user: createdUser.firstname,
 						password: req.body.password,
@@ -120,7 +133,7 @@ const usersController = {
 				// on renvoie les données créées
 				res.status(201).json(createdUser);
 			} else {
-				res.status(401).json({ message: "INVALID_PERMISSIONS" });
+				res.status(401).json({ message: 'INVALID_PERMISSIONS' });
 			}
 		} catch (error) {
 			next(
@@ -136,6 +149,18 @@ const usersController = {
 	 */
 	update: async (req, res, next) => {
 		try {
+			if (req.file) {
+				const fileExtension = req.file.originalname.split('.').pop();
+
+				const urlImage = await uploadService.upload(
+					'users',
+					fileExtension,
+					req.file.buffer
+				);
+
+				req.body.url_image = urlImage;
+			}
+
 			if (req.params.id === req.user.id || req.user.admin === true) {
 				// si on cherche à modifier le mot de passe
 				let newPassword;
@@ -167,14 +192,13 @@ const usersController = {
 						id: req.user.id,
 						admin: updatedUser.admin ?? false,
 						firstName: updatedUser.firstname,
-						experience: updatedUser.experience ?? "BEGINNER",
+						experience: updatedUser.experience ?? 'BEGINNER',
 					});
-					console.log("JWT", jwt);
 				}
 				// on retourne l'utilisateur mis à jour
 				res.json({ data: updatedUser, token: jwt });
 			} else {
-				res.status(401).json({ message: "INVALID_PERMISSIONS" });
+				res.status(401).json({ message: 'INVALID_PERMISSIONS' });
 			}
 		} catch (error) {
 			next(
@@ -202,7 +226,7 @@ const usersController = {
 				// on renvoie un status 204 - no content pour signaler au front que l'utilisateur a bien été supprimé.
 				res.status(204).json([]);
 			} else {
-				res.status(401).json({ message: "INVALID_PERMISSIONS" });
+				res.status(401).json({ message: 'INVALID_PERMISSIONS' });
 			}
 		} catch (error) {
 			next(
