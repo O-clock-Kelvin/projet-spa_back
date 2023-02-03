@@ -1,12 +1,12 @@
 /** @format */
 
-import express from 'express';
-import usersController from '../controllers/users.controller.js';
-import authentification from '../middlewares/auth.middleware.js';
-import filters from '../middlewares/filters.middleware.js';
-import validate from '../middlewares/validation.middleware.js';
-import commonValidation from '../validations/common.validation.js';
-import userValidation from '../validations/user.validation.js';
+import express from "express";
+import usersController from "../controllers/users.controller.js";
+import authentification from "../middlewares/auth.middleware.js";
+import filters from "../middlewares/filters.middleware.js";
+import validate from "../middlewares/validation.middleware.js";
+import commonValidation from "../validations/common.validation.js";
+import userValidation from "../validations/user.validation.js";
 
 const userRouter = express.Router();
 
@@ -19,16 +19,16 @@ const userRouter = express.Router();
  */
 
 userRouter.get(
-	'/',
+	"/",
 	filters(userValidation.queryFilters),
 	authentification,
 	usersController.getAllUsers
 );
 
 userRouter.get(
-	'/:id',
+	"/:id",
 
-	validate(commonValidation.idParams, 'params'),
+	validate(commonValidation.idParams, "params"),
 	authentification,
 	usersController.getOne
 );
@@ -38,9 +38,9 @@ userRouter.get(
  */
 
 userRouter.post(
-	'/',
+	"/",
 
-	validate(userValidation.create, 'body'),
+	validate(userValidation.create, "body"),
 	authentification,
 	usersController.create
 );
@@ -49,10 +49,10 @@ userRouter.post(
  * update
  */
 userRouter.patch(
-	'/:id',
+	"/:id",
 
-	validate(commonValidation.idParams, 'params'),
-	validate(userValidation.update, 'body'),
+	validate(commonValidation.idParams, "params"),
+	validate(userValidation.update, "body"),
 	authentification,
 	usersController.update
 );
@@ -62,8 +62,8 @@ userRouter.patch(
  * delete
  */
 userRouter.delete(
-	'/:id',
-	validate(commonValidation.idParams, 'params'),
+	"/:id",
+	validate(commonValidation.idParams, "params"),
 	authentification,
 	usersController.delete
 );
