@@ -1,8 +1,9 @@
 /** @format */
 
-import prismaClient from '../prisma.js';
-import APIError from '../services/APIError.service.js';
-import authService from '../services/auth.service.js';
+import prismaClient from "../prisma.js";
+import APIError from "../services/APIError.service.js";
+import authService from "../services/auth.service.js";
+import mailService from "../services/mail.service.js";
 
 const usersController = {
 	/**
@@ -64,7 +65,7 @@ const usersController = {
 			if (user) {
 				res.json(user);
 			} else {
-				res.status(404).json({ message: 'NOT_FOUND' });
+				res.status(404).json({ message: "NOT_FOUND" });
 			}
 		} catch (error) {
 			next(
@@ -79,6 +80,7 @@ const usersController = {
 	/**
 	 * Méthode pour créer un nouvel utilisateur
 	 */
+
 	create: async (req, res, next) => {
 		try {
 			// on crypte le mot de passe
@@ -96,17 +98,29 @@ const usersController = {
 						name: req.body.name,
 						firstname: req.body.firstname,
 						admin: req.body.admin || false,
-						experience: req.body.experience || 'BEGINNER',
+						experience: req.body.experience || "BEGINNER",
 					},
 				});
 
-				// on retire le mot de passe de l'objet final
+				// On envoie un mail à l'aide de notre service
+				await mailService.sendTemplateEmail({
+					senderName: "ToutOPoils",
+					senderEmail: "contact@toutopoils.fr",
+					recipient: createdUser.email,
+					title: `Bienvenue sur ToutOPoils !`,
+					template: "register",
+					data: {
+						user: createdUser.firstname,
+						password: req.body.password,
+					},
+				});
+
 				delete createdUser.password;
 
 				// on renvoie les données créées
 				res.status(201).json(createdUser);
 			} else {
-				res.status(401).json({ message: 'INVALID_PERMISSIONS' });
+				res.status(401).json({ message: "INVALID_PERMISSIONS" });
 			}
 		} catch (error) {
 			next(
@@ -153,14 +167,14 @@ const usersController = {
 						id: req.user.id,
 						admin: updatedUser.admin ?? false,
 						firstName: updatedUser.firstname,
-						experience: updatedUser.experience ?? 'BEGINNER',
+						experience: updatedUser.experience ?? "BEGINNER",
 					});
-					console.log('JWT', jwt);
+					console.log("JWT", jwt);
 				}
 				// on retourne l'utilisateur mis à jour
 				res.json({ data: updatedUser, token: jwt });
 			} else {
-				res.status(401).json({ message: 'INVALID_PERMISSIONS' });
+				res.status(401).json({ message: "INVALID_PERMISSIONS" });
 			}
 		} catch (error) {
 			next(
@@ -188,7 +202,7 @@ const usersController = {
 				// on renvoie un status 204 - no content pour signaler au front que l'utilisateur a bien été supprimé.
 				res.status(204).json([]);
 			} else {
-				res.status(401).json({ message: 'INVALID_PERMISSIONS' });
+				res.status(401).json({ message: "INVALID_PERMISSIONS" });
 			}
 		} catch (error) {
 			next(
