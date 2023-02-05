@@ -198,6 +198,27 @@ const animalsController = {
 	create: async (req, res, next) => {
 		if (req.user.admin === true) {
 			try {
+				// On gère la validation de la box, si le box_id est en paramètre de la requête
+				if (req.body.box_id) {
+					const requestBox = await prismaClient.box.findUnique({
+						where: { id: req.body.box_id },
+					});
+
+					if (requestBox) {
+						if (requestBox.type !== req.body.species) {
+							throw new APIError({
+								code: 404,
+								message: 'INVALID_BOX_SPECIE',
+							});
+						}
+					} else {
+						throw new APIError({
+							code: 404,
+							message: 'BOX_NOT_FOUND',
+						});
+					}
+				}
+
 				const animal = req.body;
 
 				// création de l'objet permettant la relation avec les tags au sein de la table de liaison
@@ -240,11 +261,7 @@ const animalsController = {
 				// on renvoie les données créées
 				res.status(201).json(createAnimal);
 			} catch (error) {
-				next(
-					new APIError({
-						error,
-					})
-				);
+				next(new APIError(error));
 			}
 		} else {
 			res.status(401).json({ message: 'INVALID_PERMISSIONS' });
