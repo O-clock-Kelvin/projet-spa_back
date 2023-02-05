@@ -60,7 +60,7 @@ const animalsController = {
 					//  !req.include?.includes('walks')&& {
 
 					// 					},
-					walks: {
+					walks: req.include?.includes('walks') && {
 						orderBy: {
 							date: 'asc',
 						},
