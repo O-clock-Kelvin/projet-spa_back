@@ -57,8 +57,14 @@ const animalsController = {
 					 * est définie comme undefined
 					 * => https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Optional_chaining
 					 */
+					//  !req.include?.includes('walks')&& {
 
-					walks: !!req.include?.includes('walks'),
+					// 					},
+					walks: {
+						orderBy: {
+							date: 'asc',
+						},
+					},
 					box: !!req.include?.includes('box'),
 					tags: req.include?.includes('tags')
 						? {
