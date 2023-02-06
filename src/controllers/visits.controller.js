@@ -66,6 +66,7 @@ const visitsController = {
 					user_id: Number(req.body.user_id),
 					box_id: Number(req.body.box_id),
 					comment: req.body.comment,
+					feeling: req.body.feeling || 'GOOD',
 					date: new Date(),
 				},
 			});

@@ -2,7 +2,7 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["views"]
 }
 
@@ -36,29 +36,28 @@ model Box {
   visits  Visit[]
 }
 
-
-model Animal{
-  id Int @id() @default(autoincrement())
-  species String
-  name String
-  url_image String?
-  bio String?
-  gender String
-  size String
-  volunteer_experience String @default("BEGINNER")
-  box Box @relation(fields: [box_id], references: [id], onDelete:NoAction, onUpdate: NoAction )
-  box_id Int
-  age DateTime @db.Timestamptz() 
-  walks Walk[]
-  tags Animal_has_tag[]
+model Animal {
+  id                   Int              @id() @default(autoincrement())
+  species              String
+  name                 String
+  url_image            String?
+  bio                  String?
+  gender               String
+  size                 String
+  volunteer_experience String           @default("BEGINNER")
+  box                  Box              @relation(fields: [box_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  box_id               Int
+  age                  DateTime         @db.Timestamptz()
+  walks                Walk[]
+  tags                 Animal_has_tag[]
 }
 
 model Walk {
-  id      Int      @id() @default(autoincrement())
-  date    DateTime @db.Timestamptz()
+  id       Int       @id() @default(autoincrement())
+  date     DateTime  @db.Timestamptz()
   end_date DateTime? @db.Timestamptz()
-  comment String?
-  feeling String   @default("GOOD")
+  comment  String?
+  feeling  String    @default("GOOD")
 
   user    User @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   user_id Int
@@ -68,10 +67,11 @@ model Walk {
 }
 
 model Visit {
-  id      Int      @id() @default(autoincrement())
-  date    DateTime @db.Timestamptz()
+  id       Int       @id() @default(autoincrement())
+  date     DateTime  @db.Timestamptz()
   end_date DateTime? @db.Timestamptz()
-  comment String?
+  comment  String?
+  feeling  String    @default("GOOD")
 
   user    User @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   user_id Int
@@ -98,23 +98,23 @@ model Animal_has_tag {
 }
 
 view AnimalsToWalk {
-  id    Int    @id
-  species String
-  name String
-  url_image String?
-  bio String?
-  gender String
-  size String
-  volunteer_experience String @default("BEGINNER")
-  box_id Int
-  age DateTime @db.Timestamptz() 
-  last_walk DateTime? @db.Timestamptz()
+  id                   Int       @id
+  species              String
+  name                 String
+  url_image            String?
+  bio                  String?
+  gender               String
+  size                 String
+  volunteer_experience String    @default("BEGINNER")
+  box_id               Int
+  age                  DateTime  @db.Timestamptz()
+  last_walk            DateTime? @db.Timestamptz()
 }
 
-view BoxesToVisit{
-  id            Int    @id() 
-  type          String 
+view BoxesToVisit {
+  id            Int       @id()
+  type          String
   number        String
-  nbr_of_places Int   
-  last_visit DateTime ? @db.Timestamptz()
+  nbr_of_places Int
+  last_visit    DateTime? @db.Timestamptz()
 }
