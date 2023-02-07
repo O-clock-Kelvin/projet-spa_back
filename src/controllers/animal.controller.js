@@ -233,7 +233,6 @@ const animalsController = {
 					tagCreation = animal.tags.split(',').map((tag) => ({
 						tag_id: Number(tag),
 					}));
-					console.log('TAG CREATIOn', tagCreation);
 				}
 
 				// Gestion de l'upload d'image
