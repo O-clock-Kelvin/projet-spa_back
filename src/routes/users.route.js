@@ -7,6 +7,7 @@ import filters from '../middlewares/filters.middleware.js';
 import validate from '../middlewares/validation.middleware.js';
 import commonValidation from '../validations/common.validation.js';
 import userValidation from '../validations/user.validation.js';
+import fileUpload from '../middlewares/fileUpload.middleware.js';
 
 const userRouter = express.Router();
 
@@ -39,9 +40,10 @@ userRouter.get(
 
 userRouter.post(
 	'/',
-
-	validate(userValidation.create, 'body'),
 	authentification,
+	fileUpload.single('image'),
+	validate(userValidation.create, 'body'),
+
 	usersController.create
 );
 /**
@@ -50,10 +52,10 @@ userRouter.post(
  */
 userRouter.patch(
 	'/:id',
-
-	validate(commonValidation.idParams, 'params'),
-	validate(userValidation.update, 'body'),
 	authentification,
+	validate(commonValidation.idParams, 'params'),
+	fileUpload.single('image'),
+	validate(userValidation.update, 'body'),
 	usersController.update
 );
 

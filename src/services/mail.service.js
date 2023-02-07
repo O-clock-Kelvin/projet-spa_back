@@ -1,6 +1,6 @@
 /** @format */
 
-import mailer from '../mailer.js';
+import mailer from "../mailer.js";
 
 const mailService = {
 	/**
@@ -12,21 +12,13 @@ const mailService = {
 	 * @param {string} mailOptions.title - Mail title
 	 * @param {string} mailOptions.text - Mail content in plain text format
 	 */
-	sendRawEmail: async (mailOptions) => {
-		try {
-			await mailer.sendMail({
-				from: `${mailOptions.senderName}<${mailOptions.senderEmail}>`,
-				to: mailOptions.recipient,
-				subject: mailOptions.title,
-				text: mailOptions.text,
-			});
-		} catch (mailError) {
-			/**
-			 * @todo error handling
-			 */
-			throw new Error(mailError);
-		}
-	},
+	sendRawEmail: async (mailOptions) =>
+		mailer.sendMail({
+			from: `${mailOptions.senderName}<${mailOptions.senderEmail}>`,
+			to: mailOptions.recipient,
+			subject: mailOptions.title,
+			text: mailOptions.text,
+		}),
 
 	/**
 	 *
@@ -37,21 +29,13 @@ const mailService = {
 	 * @param {string} mailOptions.title - Mail title
 	 * @param {string} mailOptions.html - Mail content, a string containing html
 	 */
-	sendHtmlEmail: async (mailOptions) => {
-		try {
-			await mailer.sendMail({
-				from: `${mailOptions.senderName}<${mailOptions.senderEmail}>`,
-				to: mailOptions.recipient,
-				subject: mailOptions.title,
-				html: mailOptions.html,
-			});
-		} catch (mailError) {
-			/**
-			 * @todo error handling
-			 */
-			throw new Error(mailError);
-		}
-	},
+	sendHtmlEmail: async (mailOptions) =>
+		mailer.sendMail({
+			from: `${mailOptions.senderName}<${mailOptions.senderEmail}>`,
+			to: mailOptions.recipient,
+			subject: mailOptions.title,
+			html: mailOptions.html,
+		}),
 
 	/**
 	 *
@@ -63,22 +47,14 @@ const mailService = {
 	 * @param {string} mailOptions.template - Template name (ex: helloWorld)
 	 * @param {Object} mailOptions.data - containing the data to be passed to the email template
 	 */
-	sendTemplateEmail: async (mailOptions) => {
-		try {
-			await mailer.sendMail({
-				from: `${mailOptions.senderName}<${mailOptions.senderEmail}>`,
-				to: mailOptions.recipient,
-				subject: mailOptions.title,
-				template: mailOptions.template,
-				context: mailOptions.data,
-			});
-		} catch (mailError) {
-			/**
-			 * @todo error handling
-			 */
-			throw new Error(mailError);
-		}
-	},
+	sendTemplateEmail: async (mailOptions) =>
+		mailer.sendMail({
+			from: `${mailOptions.senderName}<${mailOptions.senderEmail}>`,
+			to: mailOptions.recipient,
+			subject: mailOptions.title,
+			template: mailOptions.template,
+			context: mailOptions.data,
+		}),
 };
 
 export default mailService;

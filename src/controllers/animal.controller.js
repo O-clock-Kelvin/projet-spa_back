@@ -3,6 +3,7 @@
 import qs from 'qs';
 import prismaClient from '../prisma.js';
 import APIError from '../services/APIError.service.js';
+import uploadService from '../services/upload.service.js';
 
 const animalsController = {
 	/**
@@ -11,13 +12,31 @@ const animalsController = {
 	getAll: async (req, res, next) => {
 		const { tagsList } = req.filters;
 
-		// On supprime la tagsList pour ne pas faire bugger la requête
+		// On vérifie que le filtre volunteer_experience est présent et que c'est un tableau
+		let volunteerExperienceFilter;
+		if (req.filters.volunteer_experience) {
+			if (Array.isArray(req.filters.volunteer_experience)) {
+				volunteerExperienceFilter = {
+					volunteer_experience: {
+						in: req.filters.volunteer_experience,
+					},
+				};
+			} else {
+				volunteerExperienceFilter = {
+					volunteer_experience: req.filters.volunteer_experience,
+				};
+			}
+		}
+
+		// On supprime les tags traités pour ne pas faire échouer la requete Prisma
 		delete req.filters.tagsList;
+		delete req.filters.volunteer_experience;
 
 		try {
 			const animals = await prismaClient.animal.findMany({
 				where: {
 					...req.filters,
+					...volunteerExperienceFilter,
 					...(tagsList && {
 						tags: {
 							some: {
@@ -38,8 +57,14 @@ const animalsController = {
 					 * est définie comme undefined
 					 * => https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Optional_chaining
 					 */
+					//  !req.include?.includes('walks')&& {
 
-					walks: !!req.include?.includes('walks'),
+					// 					},
+					walks: req.include?.includes('walks') && {
+						orderBy: {
+							date: 'asc',
+						},
+					},
 					box: !!req.include?.includes('box'),
 					tags: req.include?.includes('tags')
 						? {
@@ -173,14 +198,54 @@ const animalsController = {
 	create: async (req, res, next) => {
 		if (req.user.admin === true) {
 			try {
+				// On gère la validation de la box, si le box_id est en paramètre de la requête
+				if (req.body.box_id) {
+					const requestBox = await prismaClient.box.findUnique({
+						where: { id: req.body.box_id },
+					});
+
+					if (requestBox) {
+						if (requestBox.type !== req.body.species) {
+							throw new APIError({
+								code: 404,
+								message: 'INVALID_BOX_SPECIE',
+							});
+						}
+					} else {
+						throw new APIError({
+							code: 404,
+							message: 'BOX_NOT_FOUND',
+						});
+					}
+				}
+
 				const animal = req.body;
 
 				// création de l'objet permettant la relation avec les tags au sein de la table de liaison
 				let tagCreation;
-				if (animal.tags) {
-					tagCreation = animal.tags.map((tag) => ({
-						tag_id: tag,
+				if (Array.isArray(animal.tags)) {
+					if (animal.tags) {
+						tagCreation = animal.tags.map((tag) => ({
+							tag_id: tag,
+						}));
+					}
+				} else {
+					tagCreation = animal.tags.split(',').map((tag) => ({
+						tag_id: Number(tag),
 					}));
+				}
+
+				// Gestion de l'upload d'image
+				if (req.file) {
+					const fileExtension = req.file.originalname.split('.').pop();
+
+					const urlImage = await uploadService.upload(
+						'animals',
+						fileExtension,
+						req.file.buffer
+					);
+
+					animal.url_image = urlImage;
 				}
 
 				const createAnimal = await prismaClient.animal.create({
@@ -196,16 +261,13 @@ const animalsController = {
 						tags: {
 							create: tagCreation,
 						},
+						url_image: animal.url_image,
 					},
 				});
 				// on renvoie les données créées
 				res.status(201).json(createAnimal);
 			} catch (error) {
-				next(
-					new APIError({
-						error,
-					})
-				);
+				next(new APIError(error));
 			}
 		} else {
 			res.status(401).json({ message: 'INVALID_PERMISSIONS' });
@@ -218,9 +280,25 @@ const animalsController = {
 	update: async (req, res, next) => {
 		if (req.user.admin === true) {
 			try {
-				// on modifie l'animal
-				const animalId = req.params.id;
+				/**
+				 * On gère le cas d'un upload d'image pour l'animal
+				 */
+				if (req.file) {
+					// On récupère l'exension du fichier, puis on lui attribue un nom aléatoire
+					const fileExtension = req.file.originalname.split('.').pop();
 
+					// On fait appel à notre service d'upload qui transmet les données sur les serveurs d'AWS, et retourne le lien de l'image
+					const urlImage = await uploadService.upload(
+						'animals',
+						fileExtension,
+						req.file.buffer
+					);
+
+					// on ajoute le lien récupéré dans le req.body, pour ensuite le passer dans Prisma pour changer le champ url_image de l'animal en base de donnée
+					req.body.url_image = urlImage;
+				}
+
+				const animalId = req.params.id;
 				const updatedAnimal = await prismaClient.animal.update({
 					where: {
 						// on cherche l'animal par son id, on converti en number
@@ -229,6 +307,7 @@ const animalsController = {
 					// on ajoute toutes les données présentes dans req.body
 					data: req.body,
 				});
+
 				res.json(updatedAnimal);
 			} catch (error) {
 				next(

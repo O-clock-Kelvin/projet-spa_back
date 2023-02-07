@@ -3,6 +3,8 @@
 import prismaClient from '../prisma.js';
 import APIError from '../services/APIError.service.js';
 import authService from '../services/auth.service.js';
+import mailService from '../services/mail.service.js';
+import uploadService from '../services/upload.service.js';
 
 const usersController = {
 	/**
@@ -79,6 +81,7 @@ const usersController = {
 	/**
 	 * Méthode pour créer un nouvel utilisateur
 	 */
+
 	create: async (req, res, next) => {
 		try {
 			// on crypte le mot de passe
@@ -87,6 +90,17 @@ const usersController = {
 					req.body.password
 				);
 
+				if (req.file) {
+					const fileExtension = req.file.originalname.split('.').pop();
+
+					const urlImage = await uploadService.upload(
+						'users',
+						fileExtension,
+						req.file.buffer
+					);
+
+					req.body.url_image = urlImage;
+				}
 				// on crée le nouvel utilisateur en base de donnée
 				const createdUser = await prismaClient.user.create({
 					data: {
@@ -97,10 +111,23 @@ const usersController = {
 						firstname: req.body.firstname,
 						admin: req.body.admin || false,
 						experience: req.body.experience || 'BEGINNER',
+						url_image: req.body.url_image,
 					},
 				});
 
-				// on retire le mot de passe de l'objet final
+				// On envoie un mail à l'aide de notre service
+				await mailService.sendTemplateEmail({
+					senderName: 'ToutOPoils',
+					senderEmail: 'contact@toutopoils.fr',
+					recipient: createdUser.email,
+					title: `Bienvenue sur ToutOPoils !`,
+					template: 'register',
+					data: {
+						user: createdUser.firstname,
+						password: req.body.password,
+					},
+				});
+
 				delete createdUser.password;
 
 				// on renvoie les données créées
@@ -122,6 +149,18 @@ const usersController = {
 	 */
 	update: async (req, res, next) => {
 		try {
+			if (req.file) {
+				const fileExtension = req.file.originalname.split('.').pop();
+
+				const urlImage = await uploadService.upload(
+					'users',
+					fileExtension,
+					req.file.buffer
+				);
+
+				req.body.url_image = urlImage;
+			}
+
 			if (req.params.id === req.user.id || req.user.admin === true) {
 				// si on cherche à modifier le mot de passe
 				let newPassword;
@@ -155,7 +194,6 @@ const usersController = {
 						firstName: updatedUser.firstname,
 						experience: updatedUser.experience ?? 'BEGINNER',
 					});
-					console.log('JWT', jwt);
 				}
 				// on retourne l'utilisateur mis à jour
 				res.json({ data: updatedUser, token: jwt });

@@ -25,6 +25,3 @@ app.use('/v1', v1Router);
 app.use(errorMiddleware.notFound);
 // Pour gérer les erreurs, express ajoute automatiquement un paramètre err dans le middleware
 app.use(errorMiddleware.handleError);
-
-
-// app.use(errorHandler.status_404);

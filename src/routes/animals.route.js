@@ -1,12 +1,14 @@
 /** @format */
 
 import express from 'express';
+
 import animalsController from '../controllers/animal.controller.js';
 import validate from '../middlewares/validation.middleware.js';
 import animalsValidation from '../validations/animals.validation.js';
 import commonValidation from '../validations/common.validation.js';
 import filters from '../middlewares/filters.middleware.js';
 import authentification from '../middlewares/auth.middleware.js';
+import fileUpload from '../middlewares/fileUpload.middleware.js';
 
 const animalRouter = express.Router();
 
@@ -57,6 +59,7 @@ animalRouter.get(
 animalRouter.post(
 	'/',
 	authentification,
+	fileUpload.single('image'),
 	validate(animalsValidation.create, 'body'),
 	animalsController.create
 );
@@ -65,8 +68,10 @@ animalRouter.post(
  */
 animalRouter.patch(
 	'/:id',
+
 	validate(commonValidation.idParams, 'params'),
 	authentification,
+	fileUpload.single('image'),
 	validate(animalsValidation.update, 'body'),
 	animalsController.update
 );

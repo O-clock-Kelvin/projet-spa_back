@@ -3,11 +3,13 @@ import { Prisma } from '@prisma/client';
 import Joi from 'joi';
 /** @format */
 
-/**
- * @param {Object} errorObject
- * @param {any} errorObject.error
- */
 class APIError extends Error {
+	/**
+	 * @param {Object} errorObject
+	 * @param {Error} errorObject.error
+	 * @param {code} errorObject.code
+	 * @param {message} errorObject.message
+	 */
 	constructor(errorObject) {
 		super(errorObject.error);
 
@@ -36,6 +38,7 @@ class APIError extends Error {
 					break;
 			}
 		}
+
 		if (this.error instanceof Joi.ValidationError) {
 			this.code = 400;
 			this.message = 'BAD_INPUT';

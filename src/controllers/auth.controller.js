@@ -32,6 +32,7 @@ const authController = {
 						admin: user.admin ?? false,
 						firstName: user.firstname,
 						experience: user.experience ?? 'BEGINNER',
+						url_image: user.url_image ?? null,
 					});
 					// on retourne un JWT signé pour vérifier sa validité
 					res.json({ token: signedJwt });
