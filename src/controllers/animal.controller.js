@@ -223,10 +223,17 @@ const animalsController = {
 
 				// création de l'objet permettant la relation avec les tags au sein de la table de liaison
 				let tagCreation;
-				if (animal.tags) {
-					tagCreation = animal.tags.map((tag) => ({
-						tag_id: tag,
+				if (Array.isArray(animal.tags)) {
+					if (animal.tags) {
+						tagCreation = animal.tags.map((tag) => ({
+							tag_id: tag,
+						}));
+					}
+				} else {
+					tagCreation = animal.tags.split(',').map((tag) => ({
+						tag_id: Number(tag),
 					}));
+					console.log('TAG CREATIOn', tagCreation);
 				}
 
 				// Gestion de l'upload d'image
